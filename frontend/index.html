@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>AR Artwork</title>
-    <!-- Static build: deploy this folder to GitHub Pages. See config.js for media paths. -->
+    <title>AR presentation</title>
+    <!-- Static build: deploy this folder (e.g. GitHub Pages). Media paths: config.js -->
     <script src="./config.js"></script>
     <script src="./lib/aframe.min.js"></script>
     <script src="./lib/mindar-image-aframe.prod.js"></script>
@@ -39,7 +39,7 @@
 <body>
     <p id="media-error" hidden></p>
 
-    <!-- Keep imageTargetSrc in sync with ARTWORK_CONFIG.marker.src in config.js -->
+    <!-- Keep imageTargetSrc in sync with AR_CONFIG.marker.src in config.js -->
     <a-scene
         id="ar-scene"
         mindar-image="imageTargetSrc: ./media/targets.mind; maxTrack: 1; missTolerance: 80; warmupTolerance: 8; filterMinCF: 0.00001; filterBeta: 10000; uiLoading: yes; uiScanning: yes; uiError: yes;"
@@ -50,7 +50,7 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-assets>
             <video
-                id="artwork-video"
+                id="source-video"
                 crossorigin="anonymous"
                 playsinline
                 webkit-playsinline
@@ -59,8 +59,8 @@
         </a-assets>
         <a-entity mindar-image-target="targetIndex: 0">
             <a-video
-                id="projection-plane"
-                src="#artwork-video"
+                id="marker-plane"
+                src="#source-video"
                 width="1"
                 height="0.5625"
                 position="0 0 0.01"
@@ -69,7 +69,7 @@
     </a-scene>
 
     <div class="controls">
-        <button type="button" id="play-btn" onclick="window.playPiece()">Play</button>
+        <button type="button" id="play-btn" onclick="window.beginPlayback()">Play</button>
         <button type="button" id="stop-btn" onclick="window.stopPlayback()" title="Stop">✋</button>
     </div>
 

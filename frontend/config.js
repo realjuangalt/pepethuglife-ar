@@ -1,23 +1,23 @@
 /**
- * AR art piece — edit this file when you fork the project.
- * Replace files under ./media/ and keep marker paths in sync with index.html (mindar-image).
+ * Edit this file for your build. Keep marker paths aligned with index.html (mindar-image).
  *
- * Extensions: assign functions on window.ARTWORK_HOOKS in a separate script
- * (e.g. beforePlay, afterPlay, afterStop, onEnded) for analytics, AI pipelines, etc.
+ * Optional hooks: assign functions on window.AR_HOOKS in another script
+ * (beforePlay, afterPlay, afterStop, onEnded) for analytics, AI, etc.
  */
-window.ARTWORK_CONFIG = {
-  title: 'AR Artwork',
+window.AR_CONFIG = {
+  title: 'AR presentation',
 
   video: {
-    src: './media/artwork.mp4',
+    src: './media/video.mp4',
     loop: false,
     mutedUntilPlay: true,
   },
 
-  /** Set to { src: './media/your-audio.mp3' } to use a separate audio file (video is muted). */
+  /** Set to { src: './media/audio.mp3' } to use separate audio (video track is muted). */
   audio: null,
 
-  projection: {
+  /** Size and pose of the video on the printed marker (meters / degrees). */
+  plane: {
     width: 1,
     height: 0.5625,
     position: '0 0 0.01',
@@ -25,7 +25,7 @@ window.ARTWORK_CONFIG = {
   },
 
   /**
-   * Marker file for MindAR — must match imageTargetSrc in index.html <a-scene mindar-image="...">
+   * MindAR target — imageTargetSrc in index.html must match marker.src
    */
   marker: {
     src: './media/targets.mind',

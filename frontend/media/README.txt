@@ -1,9 +1,9 @@
-Place your art piece media here:
+Add your media here:
 
-  artwork.mp4     — main video for the marker projection (H.264 MP4 or WebM; test on iOS Safari)
-  targets.mind    — compiled MindAR target for your printed marker (see MindAR docs)
+  video.mp4       — main video for the marker (H.264 MP4 or WebM; test on target browsers)
+  targets.mind    — MindAR compiled target for your printed marker
 
-Optional:
-  Separate audio file — set ARTWORK_CONFIG.audio in ../config.js
+Optional separate soundtrack:
+  Set AR_CONFIG.audio in ../config.js (e.g. { src: './media/audio.mp3' })
 
-Update paths in ../config.js if you use different filenames.
+Rename files in ../config.js if you use different names.

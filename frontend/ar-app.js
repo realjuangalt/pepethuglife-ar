@@ -1,28 +1,28 @@
 (function () {
   'use strict';
 
-  const C = window.ARTWORK_CONFIG;
+  const C = window.AR_CONFIG;
   if (!C) {
-    console.error('ARTWORK_CONFIG missing — load config.js before ar-app.js');
+    console.error('AR_CONFIG missing — load config.js before ar-app.js');
     return;
   }
 
   /**
-   * Optional hooks for forks (AI pipeline, analytics, etc.)
-   * Assign functions from another script: window.ARTWORK_HOOKS.beforePlay = async () => { ... }
+   * Optional hooks for forks (analytics, AI pipeline, etc.)
+   * window.AR_HOOKS.beforePlay = async () => { ... }
    */
-  window.ARTWORK_HOOKS = window.ARTWORK_HOOKS || {};
+  window.AR_HOOKS = window.AR_HOOKS || {};
 
   let separateAudio = null;
   let separateAudioSrc = null;
 
   function runHook(name) {
-    const h = window.ARTWORK_HOOKS[name];
+    const h = window.AR_HOOKS[name];
     if (typeof h === 'function') {
       try {
         return h();
       } catch (e) {
-        console.warn('ARTWORK_HOOKS.' + name + ' failed', e);
+        console.warn('AR_HOOKS.' + name + ' failed', e);
       }
     }
     return Promise.resolve();
@@ -38,7 +38,7 @@
   function applyConfigToDom() {
     document.title = C.title;
 
-    const vid = document.getElementById('artwork-video');
+    const vid = document.getElementById('source-video');
     if (vid) {
       vid.src = C.video.src;
       vid.loop = !!C.video.loop;
@@ -47,9 +47,9 @@
       }
     }
 
-    const plane = document.getElementById('projection-plane');
-    if (plane && C.projection) {
-      const p = C.projection;
+    const plane = document.getElementById('marker-plane');
+    if (plane && C.plane) {
+      const p = C.plane;
       if (p.width != null) plane.setAttribute('width', p.width);
       if (p.height != null) plane.setAttribute('height', p.height);
       if (p.position) plane.setAttribute('position', p.position);
@@ -68,7 +68,7 @@
         err.textContent =
           'Could not load video: ' +
           C.video.src +
-          '. Add your file or update ARTWORK_CONFIG.video.src in config.js.';
+          '. Add the file or set AR_CONFIG.video.src in config.js.';
       });
     }
 
@@ -85,10 +85,10 @@
     }
   }
 
-  async function playPiece() {
+  async function beginPlayback() {
     await runHook('beforePlay');
 
-    const vid = document.getElementById('artwork-video');
+    const vid = document.getElementById('source-video');
     const stopBtn = document.getElementById('stop-btn');
     if (!vid) return;
 
@@ -121,7 +121,7 @@
   }
 
   function stopPlayback() {
-    const vid = document.getElementById('artwork-video');
+    const vid = document.getElementById('source-video');
     if (vid) {
       vid.pause();
       vid.currentTime = 0;
@@ -144,6 +144,6 @@
     applyConfigToDom();
   });
 
-  window.playPiece = playPiece;
+  window.beginPlayback = beginPlayback;
   window.stopPlayback = stopPlayback;
 })();
