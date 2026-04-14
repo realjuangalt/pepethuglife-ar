@@ -14,6 +14,7 @@
   window.ARTWORK_HOOKS = window.ARTWORK_HOOKS || {};
 
   let separateAudio = null;
+  let separateAudioSrc = null;
 
   function runHook(name) {
     const h = window.ARTWORK_HOOKS[name];
@@ -95,8 +96,9 @@
 
     if (C.audio && C.audio.src) {
       vid.muted = true;
-      if (!separateAudio) {
+      if (!separateAudio || separateAudioSrc !== C.audio.src) {
         separateAudio = new Audio(C.audio.src);
+        separateAudioSrc = C.audio.src;
       }
       separateAudio.currentTime = 0;
       try {
