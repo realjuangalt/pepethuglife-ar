@@ -16,8 +16,5 @@
     "mindar",
     "aframe",
     "github-pages"
-  ],
-  "engines": {
-    "node": ">=18"
-  }
+  ]
 }
