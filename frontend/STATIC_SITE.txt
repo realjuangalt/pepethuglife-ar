@@ -1,0 +1,43 @@
+What visitors load (GitHub Pages)
+---------------------------------
+Only files under this folder should be published. In the repo: Settings → Pages →
+Build from branch "main", folder "/frontend".
+
+The live site loads: index.html, config.js, ar-app.js, lib/*.js, and media/*.
+There is no Python, no Flask, and no request to a server-side AI stack.
+
+The MindAR library (lib/mindar-image-aframe.prod.js) includes TensorFlow.js for
+image tracking on the GPU. That is normal for MindAR and is not your old backend;
+it runs entirely in the browser for marker detection.
+
+The "backend/" folder at the repo root is legacy/upstream code. It is not
+deployed when Pages uses the "/frontend" folder, and the static site does not
+import it.
+
+Where to put the projected video
+--------------------------------
+Place the file here:
+
+  frontend/media/video.mp4
+
+If you use another name or path, set AR_CONFIG.video.src in config.js and keep
+the same path in sync if you reference it elsewhere.
+
+New marker / targets.mind
+-------------------------
+MindAR needs a compiled target file (.mind) built from your printed marker image.
+
+1. Prepare one clear reference image (often the same artwork as the physical print).
+2. Compile it to .mind using the official browser tool:
+   https://hiukim.github.io/mind-ar-js-doc/tools/compile
+   (Documented in the MindAR repo: "Target Images Compiler".)
+
+3. Download/save the generated .mind file as:
+
+  frontend/media/targets.mind
+
+4. Keep these in sync (same path):
+   - AR_CONFIG.marker.src in config.js
+   - The mindar-image="imageTargetSrc: ..." attribute in index.html
+
+Official docs index: https://hiukim.github.io/mind-ar-js-doc/

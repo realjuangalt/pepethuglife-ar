@@ -2,7 +2,7 @@
  * Edit this file for your build. Keep marker paths aligned with index.html (mindar-image).
  *
  * Optional hooks: assign functions on window.AR_HOOKS in another script
- * (beforePlay, afterPlay, afterStop, onEnded) for analytics, AI, etc.
+ * (beforePlay, afterPlay, afterStop, onEnded) for analytics or extra logic.
  */
 window.AR_CONFIG = {
   title: 'AR presentation',
