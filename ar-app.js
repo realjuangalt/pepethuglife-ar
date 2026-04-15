@@ -181,6 +181,7 @@
         plane.setAttribute('height', '1');
 
         target.appendChild(plane);
+        target.setAttribute('visible', false);
         scene.appendChild(target);
       }
     });
@@ -324,12 +325,16 @@
   function onTargetFound(idx) {
     visible[idx] = true;
     lastFoundIndex = idx;
+    const targetEl = document.getElementById('target-' + idx);
+    if (targetEl) targetEl.setAttribute('visible', true);
     playLoopForIndex(idx);
     preloadAndMaybePlayFull(idx);
   }
 
   function onTargetLost(idx) {
     visible[idx] = false;
+    const targetEl = document.getElementById('target-' + idx);
+    if (targetEl) targetEl.setAttribute('visible', false);
 
     const loopVid = getVideoEl(idx);
     if (loopVid) loopVid.pause();
