@@ -19,7 +19,7 @@ window.AR_CONFIG = {
    */
   markers: [
     {
-      targetIndex: 0,
+      targetIndex: 1,
       label: 'PEPETHUGLIFE',
       loop: {
         src: './media/PEPETHUGLIFE-loop.mp4',
@@ -35,7 +35,7 @@ window.AR_CONFIG = {
       },
     },
     {
-      targetIndex: 1,
+      targetIndex: 0,
       label: 'SHADILAYTHUG',
       loop: {
         src: './media/SHADILAYTHUG-loop.mp4',

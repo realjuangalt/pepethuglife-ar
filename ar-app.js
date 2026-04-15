@@ -36,8 +36,8 @@
 
   const visible = {};
   let lastFoundIndex = 0;
-  /** Which marker index is playing the full (large) clip, or null */
-  let fullActiveFor = null;
+  const fullReady = {};
+  const fullLoading = {};
 
   function removeVRButton() {
     document.querySelectorAll('.a-enter-vr, .a-enter-vr-button, .a-enter-vr-fullscreen').forEach(function (el) {
@@ -48,6 +48,10 @@
 
   function getVideoEl(idx) {
     return document.getElementById('video-' + idx);
+  }
+
+  function getFullVideoEl(idx) {
+    return document.getElementById('video-full-' + idx);
   }
 
   function getMarkerConfig(idx) {
@@ -66,18 +70,6 @@
       el.style.display = 'none';
       el.textContent = '';
     }
-  }
-
-  function updatePlayButton() {
-    const btn = document.getElementById('play-full-btn');
-    if (!btn) return;
-    const anyVisible = C.markers.some(function (m) {
-      return visible[m.targetIndex];
-    });
-    const idx = pickVisibleTargetIndex();
-    const m = idx !== null ? getMarkerConfig(idx) : null;
-    const hasFull = m && m.full && m.full.src;
-    btn.disabled = !anyVisible || !hasFull || fullActiveFor !== null;
   }
 
   function pickVisibleTargetIndex() {
@@ -152,6 +144,20 @@
         assets.appendChild(vid);
       }
 
+      let fullVid = getFullVideoEl(idx);
+      if (!fullVid) {
+        fullVid = document.createElement('video');
+        fullVid.id = 'video-full-' + idx;
+        fullVid.setAttribute('crossorigin', 'anonymous');
+        fullVid.setAttribute('playsinline', '');
+        fullVid.setAttribute('webkit-playsinline', '');
+        fullVid.setAttribute('preload', 'auto');
+        // Start muted; we will try to unmute when playing.
+        fullVid.muted = true;
+        fullVid.loop = false;
+        assets.appendChild(fullVid);
+      }
+
       let target = document.getElementById('target-' + idx);
       if (!target) {
         target = document.createElement('a-entity');
@@ -201,11 +207,6 @@
       }
     });
 
-    const playBtn = document.getElementById('play-full-btn');
-    const stopBtn = document.getElementById('stop-btn');
-    if (playBtn && C.ui) playBtn.textContent = C.ui.playFull || 'Full song';
-    if (stopBtn && C.ui) stopBtn.setAttribute('title', C.ui.stop || 'Stop');
-
     const err = document.getElementById('media-error');
     C.markers.forEach(function (m) {
       const idx = m.targetIndex;
@@ -220,13 +221,9 @@
         });
       }
     });
-
-    updatePlayButton();
   }
 
   function playLoopForIndex(idx) {
-    if (fullActiveFor === idx) return;
-
     const m = getMarkerConfig(idx);
     const vid = getVideoEl(idx);
     if (!m || !m.loop || !m.loop.src || !vid) return;
@@ -242,44 +239,93 @@
     vid.play().catch(function () {});
   }
 
+  function showLoadingForIndex(idx, show) {
+    // Only show the loader for the currently visible target.
+    const current = pickVisibleTargetIndex();
+    if (!show && current !== idx) return;
+    const m = getMarkerConfig(idx);
+    const label = (m && m.label) || 'video';
+    setLoadingFull(!!show, 'Loading ' + label + '…');
+  }
+
+  function switchPlaneToLoop(idx) {
+    const plane = document.getElementById('plane-' + idx);
+    if (plane) plane.setAttribute('src', '#video-' + idx);
+  }
+
+  function switchPlaneToFull(idx) {
+    const plane = document.getElementById('plane-' + idx);
+    if (plane) plane.setAttribute('src', '#video-full-' + idx);
+  }
+
+  function preloadAndMaybePlayFull(idx) {
+    const m = getMarkerConfig(idx);
+    if (!m || !m.full || !m.full.src) return;
+    if (fullReady[idx] || fullLoading[idx]) return;
+
+    const fullVid = getFullVideoEl(idx);
+    if (!fullVid) return;
+
+    fullLoading[idx] = true;
+    showLoadingForIndex(idx, true);
+
+    const fullUrl = resolveUrl(m.full.src);
+    fullVid.muted = true; // start muted, try to unmute when playing
+    fullVid.loop = false;
+    if (fullVid.src !== fullUrl) {
+      fullVid.src = fullUrl;
+      fullVid.load();
+    }
+
+    const onReady = function () {
+      fullVid.removeEventListener('error', onErr);
+      fullLoading[idx] = false;
+      fullReady[idx] = true;
+
+      if (!visible[idx]) {
+        showLoadingForIndex(idx, false);
+        return;
+      }
+
+      switchPlaneToFull(idx);
+      showLoadingForIndex(idx, false);
+
+      // Try to play with audio; if blocked, fall back to muted playback.
+      fullVid.muted = false;
+      fullVid.play().catch(function () {
+        fullVid.muted = true;
+        fullVid.play().catch(function () {});
+      });
+    };
+
+    const onErr = function () {
+      fullVid.removeEventListener('canplay', onReady);
+      fullLoading[idx] = false;
+      showLoadingForIndex(idx, false);
+    };
+
+    fullVid.addEventListener('canplay', onReady, { once: true });
+    fullVid.addEventListener('error', onErr, { once: true });
+  }
+
   function onTargetFound(idx) {
     visible[idx] = true;
     lastFoundIndex = idx;
-    updatePlayButton();
-
-    if (fullActiveFor === idx) {
-      const vid = getVideoEl(idx);
-      if (vid && vid.paused) {
-        vid.play().catch(function () {});
-      }
-      return;
-    }
-
     playLoopForIndex(idx);
+    preloadAndMaybePlayFull(idx);
   }
 
   function onTargetLost(idx) {
     visible[idx] = false;
-    updatePlayButton();
 
-    const vid = getVideoEl(idx);
-    if (vid) vid.pause();
+    const loopVid = getVideoEl(idx);
+    if (loopVid) loopVid.pause();
 
-    if (fullActiveFor === idx) {
-      fullActiveFor = null;
-      setLoadingFull(false);
-      const stopBtn = document.getElementById('stop-btn');
-      if (stopBtn) stopBtn.style.display = 'none';
-      const m = getMarkerConfig(idx);
-      if (m && m.loop && m.loop.src) {
-        vid.muted = true;
-        vid.loop = true;
-        vid.src = resolveUrl(m.loop.src);
-        vid.dataset.mode = 'loop';
-        vid.load();
-      }
-      runHook('afterStop');
-    }
+    const fullVid = getFullVideoEl(idx);
+    if (fullVid) fullVid.pause();
+
+    switchPlaneToLoop(idx);
+    showLoadingForIndex(idx, false);
   }
 
   function wireMindarTargets() {
@@ -305,105 +351,6 @@
     } else {
       scene.addEventListener('loaded', bind);
     }
-  }
-
-  /**
-   * Phase 2: load large file on demand (not preloaded as whole-file download until user taps).
-   * Uses progressive buffering; UI shows loading until playback can start.
-   */
-  async function beginFullPlayback() {
-    await runHook('beforePlay');
-
-    const idx = pickVisibleTargetIndex();
-    if (idx === null) {
-      alert((C.ui && C.ui.pointAtCard) || 'Point camera at a card first.');
-      return;
-    }
-
-    const m = getMarkerConfig(idx);
-    if (!m || !m.full || !m.full.src) return;
-
-    const vid = getVideoEl(idx);
-    const stopBtn = document.getElementById('stop-btn');
-    if (!vid) return;
-
-    if (fullActiveFor !== null && fullActiveFor !== idx) {
-      stopFullPlayback();
-    }
-
-    fullActiveFor = idx;
-    vid.muted = false;
-    vid.loop = false;
-    setLoadingFull(true);
-    updatePlayButton();
-
-    const fullUrl = resolveUrl(m.full.src);
-    vid.src = fullUrl;
-    vid.dataset.mode = 'full';
-    vid.load();
-
-    const onReady = function () {
-      vid.removeEventListener('error', onErr);
-      setLoadingFull(false);
-      vid.play().catch(function (e) {
-        console.error('Full video play failed', e);
-        alert('Playback failed. Try again or check network.');
-        stopFullPlayback();
-      });
-      if (stopBtn) stopBtn.style.display = 'inline-flex';
-      updatePlayButton();
-      runHook('afterPlay');
-    };
-
-    const onErr = function () {
-      vid.removeEventListener('canplay', onReady);
-      setLoadingFull(false);
-      fullActiveFor = null;
-      updatePlayButton();
-      alert('Could not load full video. File missing or network error.');
-    };
-
-    vid.addEventListener('canplay', onReady, { once: true });
-    vid.addEventListener('error', onErr, { once: true });
-
-    vid.addEventListener(
-      'ended',
-      function onEnd() {
-        vid.removeEventListener('ended', onEnd);
-        stopFullPlayback();
-      },
-      { once: true }
-    );
-  }
-
-  function stopFullPlayback() {
-    if (fullActiveFor === null) return;
-
-    const idx = fullActiveFor;
-    fullActiveFor = null;
-    setLoadingFull(false);
-
-    const vid = getVideoEl(idx);
-    const stopBtn = document.getElementById('stop-btn');
-    if (stopBtn) stopBtn.style.display = 'none';
-
-    if (vid) {
-      vid.pause();
-      const m = getMarkerConfig(idx);
-      if (m && m.loop && m.loop.src) {
-        vid.muted = true;
-        vid.loop = true;
-        vid.src = resolveUrl(m.loop.src);
-        vid.dataset.mode = 'loop';
-        vid.load();
-        if (visible[idx]) {
-          vid.play().catch(function () {});
-        }
-      }
-    }
-
-    updatePlayButton();
-    runHook('afterStop');
   }
 
   function initMenu() {
@@ -457,8 +404,4 @@
     wireMindarTargets();
     initMenu();
   });
-
-  window.beginFullPlayback = beginFullPlayback;
-  window.stopFullPlayback = stopFullPlayback;
-  window.stopPlayback = stopFullPlayback;
 })();

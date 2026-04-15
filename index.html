@@ -16,33 +16,35 @@
             border-radius: 8px; font-size: 14px; line-height: 1.4; z-index: 2000; text-align: center;
         }
         #loading-full {
-            position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
-            max-width: 90vw; padding: 0.5rem 1rem; background: rgba(0,0,0,0.65); color: #fff;
-            border-radius: 8px; font-size: 14px; z-index: 1001; display: none;
+            position: fixed;
+            left: 50%;
+            bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.32);
+            color: rgba(255,255,255,0.92);
+            font-size: 13px;
+            letter-spacing: 0.01em;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
         }
-        .controls {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
-            justify-content: center; max-width: 96vw;
+        #loading-full::before {
+            content: "";
+            width: 14px;
+            height: 14px;
+            border-radius: 999px;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: rgba(255,255,255,0.95);
+            animation: spin 0.85s linear infinite;
         }
-        .controls button {
-            min-height: 48px; min-width: 48px; border: none; border-radius: 24px;
-            cursor: pointer; font-size: 15px; font-weight: 600; padding: 14px 28px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-        }
-        .controls button:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-        }
-        #play-full-btn { background: #2196f3; color: #fff; }
-        #stop-btn {
-            display: none; background: rgba(244, 67, 54, 0.9); color: #fff;
-            font-size: 22px; padding: 14px 20px;
-        }
-        @media (max-width: 480px) {
-            .controls { bottom: 16px; }
-            .controls button { font-size: 14px; padding: 12px 22px; }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Subtle burger — bottom left, above safe area */
         .menu-burger {
@@ -162,11 +164,6 @@
         <a-assets id="ar-assets"></a-assets>
         <!-- Targets are injected from config.js by ar-app.js -->
     </a-scene>
-
-    <div class="controls">
-        <button type="button" id="play-full-btn" disabled onclick="window.beginFullPlayback()">Full song</button>
-        <button type="button" id="stop-btn" onclick="window.stopFullPlayback()" title="Stop">✋</button>
-    </div>
 
     <button type="button" id="menu-burger" class="menu-burger" aria-label="Menu" aria-expanded="false" aria-controls="menu-panel" hidden></button>
     <div id="menu-panel" class="menu-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Links" hidden>
