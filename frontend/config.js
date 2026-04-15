@@ -36,22 +36,6 @@ window.AR_CONFIG = {
         rotation: '0 0 0',
       },
     },
-    {
-      targetIndex: 1,
-      label: 'SHADILAYTHUG',
-      loop: {
-        src: './media/SHADILAYTHUG-loop.mp4',
-      },
-      full: {
-        src: './media/SHADILAYTHUG & PEPETHUGLIFE - full song.mp4',
-      },
-      plane: {
-        width: 1,
-        height: 1.3925,
-        position: '0 0 0.01',
-        rotation: '0 0 0',
-      },
-    },
   ],
 
   ui: {

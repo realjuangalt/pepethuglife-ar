@@ -52,7 +52,7 @@
     <!-- imageTargetSrc must match AR_CONFIG.marker.src; maxTrack ≥ number of targets -->
     <a-scene
         id="ar-scene"
-        mindar-image="imageTargetSrc: ./media/targets.mind; maxTrack: 2; missTolerance: 80; warmupTolerance: 8; filterMinCF: 0.00001; filterBeta: 10000; uiLoading: yes; uiScanning: yes; uiError: yes;"
+        mindar-image="imageTargetSrc: ./media/targets.mind; maxTrack: 1; missTolerance: 80; warmupTolerance: 8; filterMinCF: 0.00001; filterBeta: 10000; uiLoading: yes; uiScanning: yes; uiError: yes;"
         vr-mode-ui="enabled: false"
         xr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
@@ -67,14 +67,6 @@
                 preload="auto"
                 muted
                 loop></video>
-            <video
-                id="video-1"
-                crossorigin="anonymous"
-                playsinline
-                webkit-playsinline
-                preload="auto"
-                muted
-                loop></video>
         </a-assets>
         <a-entity id="target-0" mindar-image-target="targetIndex: 0">
             <a-video
@@ -82,15 +74,6 @@
                 src="#video-0"
                 width="1"
                 height="1.3975"
-                position="0 0 0.01"
-                rotation="0 0 0"></a-video>
-        </a-entity>
-        <a-entity id="target-1" mindar-image-target="targetIndex: 1">
-            <a-video
-                id="plane-1"
-                src="#video-1"
-                width="1"
-                height="1.3925"
                 position="0 0 0.01"
                 rotation="0 0 0"></a-video>
         </a-entity>
