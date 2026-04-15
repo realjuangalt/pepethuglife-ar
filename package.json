@@ -1,20 +1,12 @@
 {
   "name": "pepethuglife-static-ar",
   "version": "1.0.0",
-  "description": "Static MindAR + video marker presentation (GitHub Pages). Legacy Python backend optional/unused for static deploy.",
+  "description": "Static MindAR + A-Frame marker AR for GitHub Pages (repo root).",
   "private": true,
   "scripts": {
-    "start": "python3 start_backend.py",
-    "dev": "python3 start_backend.py",
-    "backend": "cd backend && python3 app.py",
-    "build": "echo 'Static site: deploy frontend/ only'",
-    "test": "python3 -m pytest tests/",
-    "install": "pip3 install -r requirements-python.txt"
+    "preview": "python3 -m http.server 8080",
+    "build": "echo 'No build step — deploy the repo root as static files.'"
   },
-  "keywords": [
-    "ar",
-    "mindar",
-    "aframe",
-    "github-pages"
-  ]
+  "keywords": ["ar", "mindar", "aframe", "github-pages"],
+  "license": "UNLICENSED"
 }

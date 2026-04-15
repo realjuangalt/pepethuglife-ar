@@ -1,0 +1,33 @@
+What visitors load (GitHub Pages)
+---------------------------------
+Publish from the **repository root** (branch main, folder **/**).
+
+Site root (/) serves index.html — AR experience (camera + MindAR).
+
+The live site loads: index.html, config.js, ar-app.js, lib/*.js, and media/*.
+There is no Python, Flask, or server-side stack.
+
+The MindAR bundle (lib/mindar-image-aframe.prod.js) includes TensorFlow.js for
+in-browser image tracking.
+
+Media model (two-phase)
+------------------------
+- Phase 1: small muted loop MP4s per marker (fast; autoplay when tracked).
+- Phase 2: large full-song MP4s; loaded after the user taps "Full song".
+
+Paths are set in config.js under AR_CONFIG.markers (loop + full).
+
+GIFs: convert to MP4 for loops (see scripts/convert-gif-loops.sh). The AR
+plane uses <video>, not raw GIF animation in WebGL.
+
+targets.mind
+------------
+Compile ALL reference images you need into ONE .mind file, in the same order as
+targetIndex in config.js (0 = first image in the compiler).
+
+1. Compiler: https://hiukim.github.io/mind-ar-js-doc/tools/compile
+2. Save as media/targets.mind
+3. Same path in AR_CONFIG.marker.src and index.html mindar-image imageTargetSrc
+4. maxTrack in index.html must be >= number of targets
+
+Docs: https://hiukim.github.io/mind-ar-js-doc/

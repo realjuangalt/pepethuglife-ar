@@ -1,90 +1,54 @@
 # pepethuglife-static-ar
 
-**Primary goal:** ship a **fully static** site on **GitHub Pages** so the experience runs **without you operating any server**—no VPS, no Flask, no process to keep alive. Pushing to the repo and pointing Pages at `frontend/` is enough for production.
+**Goal:** a **fully static** marker-based AR page on **GitHub Pages** — HTML, JS, and media only. No server, no backend, no AI pipeline in production.
 
-A **stripped-down** marker-based AR page: point a phone camera at a **specific printed image**, see a **video** mapped onto that marker, and play **video audio** or an optional **separate audio file**. There is **no AI**, no speech-to-text, and no server-side pipeline in the deployed experience.
+Point a phone camera at a **printed target image**; MindAR tracks it and an **MP4** is projected on the card. Optional **full-length** video plays after a tap (“Full song”).
 
-This repo keeps the **same general idea** as an earlier, fuller project (printed target + AR presentation), but the implementation only supports **a small set of compiled targets and media** you configure in one place.
+## GitHub Pages (this repo layout)
 
-## What it does
+The site lives at the **repository root** (`index.html`, `config.js`, `lib/`, `media/`).
 
-1. **Image tracking** — [MindAR](https://github.com/hiukim/mind-ar-js) detects one of your compiled markers in `targets.mind` (this project is set up for **two** targets: Pepe + Shadilay).
-2. **Video projection** — Each marker has its own `<a-video>` plane with a **short, muted loop** (Phase 1) so the experience starts quickly on GitHub Pages.
-3. **Full clips** — The user can tap **Full song** to load and play a **large MP4 with audio** (Phase 2) on demand—files are not fully preloaded until then, which avoids blocking the first paint on big assets (~30MB+).
+**Settings → Pages:** branch **`main`**, folder **`/` (root)**.
 
-**GIFs** are not used directly on the AR plane: they are converted to **small MP4 loops** (`scripts/convert-gif-loops.sh`) because WebGL video textures expect `<video>` sources; animated GIFs on a plane usually show a single frame.
+- **Site entry:** `/` → `index.html` (AR experience; camera permission + tracking).
+- **Alternate URL:** `/ar.html` redirects to `/` (bookmarks).
 
-Everything runs **in the browser** from static files. GitHub Pages (or any static host) only serves HTML, JS, and media—there is **no backend in production**.
+Custom domain: keep **`CNAME`** at the repo root (e.g. `www.pepethuglife.lol`). **``.nojekyll`** is included so GitHub Pages does not run Jekyll on these files.
 
-## Technology
+## What’s in the tree
 
-| Piece | Role |
-|--------|------|
-| HTML / CSS / vanilla JS | UI and wiring |
-| [A-Frame](https://aframe.io/) | Scene and video entity |
-| MindAR (image target) | Marker tracking (uses TensorFlow.js inside the MindAR bundle for tracking math in the browser) |
-| MP4 / optional MP3 | Media you supply under `frontend/media/` |
-
-## Repository layout
-
-```
-├── frontend/                 # Static site — this is what you deploy
-│   ├── index.html          # Placeholder landing (root URL on Pages)
-│   ├── ar.html             # A-Frame + MindAR scene
-│   ├── config.js           # Video path, marker path, plane size, copy
-│   ├── ar-app.js           # Loop on track, full clip on demand, AR_HOOKS
-│   ├── lib/                # aframe + mindar-image (vendored)
-│   └── media/              # targets.mind, video, optional audio
-├── backend/                # Legacy Python stack — not used by the static Pages deploy
-├── package.json            # Metadata; "build" is a no-op reminder for static deploy
-└── …                       # install/start scripts for optional local backend work
-```
-
-For deployment details and path sync rules, see `frontend/STATIC_SITE.txt` and `frontend/media/README.txt`.
+| Path | Role |
+|------|------|
+| `index.html` | A-Frame + MindAR scene (main entry) |
+| `ar.html` | Redirect to `/` |
+| `config.js` | `AR_CONFIG`: marker file, per-target loop + full video paths |
+| `ar-app.js` | Track found/lost, loop vs full playback |
+| `lib/` | Vendored A-Frame + MindAR |
+| `media/` | `targets.mind`, MP4s, source art |
+| `scripts/convert-gif-loops.sh` | Optional: GIF → small muted loop MP4s (`ffmpeg`) |
 
 ## Configuration
 
-1. **Compiled markers** — Build `frontend/media/targets.mind` with **both** reference images in a **single** compile, in the same order as `AR_CONFIG.markers[].targetIndex` (0 = first image, 1 = second). [MindAR compile tool](https://hiukim.github.io/mind-ar-js-doc/tools/compile).
-2. **Keep paths aligned** — The same `targets.mind` path must appear in:
-   - `frontend/index.html` (`mindar-image` → `imageTargetSrc`)
-   - `frontend/config.js` → `AR_CONFIG.marker.src`
-3. **Per-marker media** — In `frontend/config.js`, each entry under `markers` has:
-   - `loop` — Small muted MP4 (Phase 1), autoplay when that marker is visible.
-   - `full` — Large MP4 (Phase 2), loaded when the user taps **Full song** while that marker is tracked.
-4. **Optional hooks** — `window.AR_HOOKS` (`beforePlay`, `afterPlay`, `afterStop`) — see `config.js`.
+1. **Compile** `media/targets.mind` with the [MindAR compiler](https://hiukim.github.io/mind-ar-js-doc/tools/compile) from your **print** reference image(s). Target order must match `AR_CONFIG.markers[].targetIndex` (0 = first image in the compiler).
 
-**Large files:** Phase 2 uses progressive buffering until `canplay`. For very slow networks, a future improvement is **HLS** (`.m3u8` + segments) hosted on the same static site— not implemented here yet.
+2. **Keep paths aligned:** the same `targets.mind` path must appear in:
+   - `index.html` → `mindar-image` → `imageTargetSrc`
+   - `config.js` → `AR_CONFIG.marker.src`
 
-## Local preview (development only)
+3. **Per marker** in `config.js`: `loop` (small muted MP4, autoplay when tracked), `full` (large MP4 on demand).
 
-A tiny local server is **only** for testing before you push—you are not required to run anything in production.
+**GIFs:** use **MP4** on the AR plane (`<a-video>`). Convert with `scripts/convert-gif-loops.sh` or `ffmpeg` locally, then commit the MP4.
 
-Serve `frontend/` over HTTP(s) (camera APIs need a secure context or localhost). For example:
+## Local preview (optional)
+
+Camera APIs need **HTTPS** or **localhost**:
 
 ```bash
-cd frontend && python3 -m http.server 8080
+python3 -m http.server 8080
 ```
 
-Then open `http://localhost:8080/` for the landing page, or `http://localhost:8080/ar.html` for the AR app.
-
-## GitHub Pages (production)
-
-**Settings → Pages:** build from branch **`main`** (or your default), folder **`/frontend`**. GitHub serves the static files.
-
-- **Landing:** `index.html` is a placeholder “coming soon” page at the site root (`https://<user>.github.io/<repo>/`).
-- **AR app:** open **`/ar.html`** for the MindAR experience (same folder as `config.js` and `media/`, so paths stay simple).
-
-Custom domains point at the same `/frontend` root; visitors see the landing first until you swap `index.html` for a full home page.
-
-- No deploy scripts beyond git push; no runtime besides GitHub’s static CDN.
-- Visitors never load `backend/` or Python—those files stay in the repo for optional local use only.
-
-## Legacy `backend/`
-
-The `backend/` tree is **optional** upstream/legacy code (Flask, Whisper, etc.). It is **not** part of the static AR experience described above. The root `package.json` `start` / `dev` scripts point at a Python entry if you still run that stack locally; the documented product for this repo is the **static** `frontend/`.
+Open `http://localhost:8080/` (or `http://127.0.0.1:8080/`).
 
 ## Third-party licenses
 
-MindAR, A-Frame, and Three.js are used under their respective open-source licenses. See each vendor’s repository for full license text.
-
-Project content and branding beyond those libraries are proprietary unless stated otherwise.
+MindAR, A-Frame, and Three.js are used under their respective open-source licenses. Project branding and non-library assets are proprietary unless stated otherwise.

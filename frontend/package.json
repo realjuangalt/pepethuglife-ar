@@ -1,9 +1,0 @@
-{
-  "name": "pepethuglife-static-ar",
-  "version": "1.0.0",
-  "description": "Static AR frontend (A-Frame + MindAR). See config.js and media/README.txt.",
-  "main": "index.html",
-  "scripts": {},
-  "keywords": ["ar", "mindar", "a-frame"],
-  "license": "ISC"
-}

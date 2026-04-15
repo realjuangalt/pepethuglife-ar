@@ -1,12 +1,10 @@
 /**
  * Static AR: paths must stay in sync with index.html (mindar-image imageTargetSrc).
  *
- * Compile targets.mind from your printed images (order = targetIndex order):
+ * Compile targets.mind from your printed reference image(s), same order as targetIndex:
  *   https://hiukim.github.io/mind-ar-js-doc/tools/compile
- * Include both reference images in one .mind, e.g. PEPETHUGLIFE-target-image.png first,
- * then SHADILAYTHUG-target-image.jpg → indices 0 and 1 respectively.
  *
- * Phase 1 — Lightweight loops (from GIF → MP4): autoplay muted when the marker is seen.
+ * Phase 1 — Lightweight loops (GIF → MP4): autoplay muted when the marker is seen.
  * Phase 2 — Full clips: user taps "Full song"; large files load on demand (see ar-app.js).
  */
 window.AR_CONFIG = {
