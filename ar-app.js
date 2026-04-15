@@ -38,7 +38,8 @@
   let lastFoundIndex = 0;
   const fullReady = {};
   const fullLoading = {};
-  let audioEnabled = false;
+  // Default ON; autoplay-with-sound may still require a user gesture.
+  let audioEnabled = true;
 
   function removeVRButton() {
     document.querySelectorAll('.a-enter-vr, .a-enter-vr-button, .a-enter-vr-fullscreen').forEach(function (el) {
@@ -73,10 +74,15 @@
     }
   }
 
-  function setAudioGate(show) {
-    const el = document.getElementById('audio-gate');
-    if (!el) return;
-    el.style.display = show ? 'inline-flex' : 'none';
+  function setAudioToggleState() {
+    const btn = document.getElementById('audio-toggle');
+    if (!btn) return;
+    const onLabel = (C.ui && C.ui.audioOn) || 'Sound on';
+    const offLabel = (C.ui && C.ui.audioOff) || 'Sound off';
+    btn.setAttribute('aria-pressed', audioEnabled ? 'true' : 'false');
+    btn.setAttribute('aria-label', audioEnabled ? onLabel : offLabel);
+    btn.setAttribute('title', audioEnabled ? onLabel : offLabel);
+    btn.textContent = audioEnabled ? '🔊' : '🔇';
   }
 
   function pickVisibleTargetIndex() {
@@ -303,12 +309,15 @@
       if (audioEnabled) {
         fullVid.muted = false;
       } else {
-        setAudioGate(true);
         fullVid.muted = true;
       }
 
       fullVid.play().catch(function () {
-        // Autoplay may be blocked; user gesture will retry via audio gate.
+        // If unmuted autoplay is blocked, fall back to muted playback.
+        if (audioEnabled) {
+          fullVid.muted = true;
+          fullVid.play().catch(function () {});
+        }
       });
     };
 
@@ -346,32 +355,24 @@
     showLoadingForIndex(idx, false);
   }
 
-  function tryEnableAudioAndResume() {
-    audioEnabled = true;
-    setAudioGate(false);
-
+  function applyAudioToVisibleFull() {
     const idx = pickVisibleTargetIndex();
     if (idx === null) return;
     const fullVid = getFullVideoEl(idx);
     if (!fullVid || !fullReady[idx]) return;
-
-    switchPlaneToFull(idx);
-    fullVid.muted = false;
+    fullVid.muted = !audioEnabled;
+    // If user just interacted (toggle click), retry play; that gesture can unlock sound.
     fullVid.play().catch(function () {});
   }
 
-  function initAudioGate() {
-    const el = document.getElementById('audio-gate');
-    if (!el) return;
-    if (C.ui && C.ui.audioGate) {
-      el.textContent = C.ui.audioGate;
-    }
-    function onActivate() {
-      tryEnableAudioAndResume();
-    }
-    el.addEventListener('click', onActivate);
-    el.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') onActivate();
+  function initAudioToggle() {
+    const btn = document.getElementById('audio-toggle');
+    if (!btn) return;
+    setAudioToggleState();
+    btn.addEventListener('click', function () {
+      audioEnabled = !audioEnabled;
+      setAudioToggleState();
+      applyAudioToVisibleFull();
     });
   }
 
@@ -449,7 +450,7 @@
     ensureDomForMarkers();
     applyConfigToDom();
     wireMindarTargets();
-    initAudioGate();
+    initAudioToggle();
     initMenu();
   });
 })();

@@ -6,7 +6,7 @@
  *
  * Phase 1 — Lightweight loops (GIF → MP4): autoplay muted when the marker is seen.
  * Phase 2 — Full clips: preloaded when marker is tracked; web-optimized MP4 (+faststart).
- * Audio: browsers require a user gesture for unmuted playback — tap "Tap to enable sound" once.
+ * Audio: we default sound ON, but some browsers require one tap before they allow unmuted playback.
  */
 window.AR_CONFIG = {
   title: 'Pepe Thug Life AR',
@@ -56,7 +56,8 @@ window.AR_CONFIG = {
   ui: {
     loadingFull: 'Loading full video…',
     pointAtCard: 'Point camera at a card',
-    audioGate: 'Tap to enable sound',
+    audioOn: 'Sound on',
+    audioOff: 'Sound off',
     menuOpen: 'Menu',
     menuClose: 'Close menu',
   },
@@ -66,7 +67,11 @@ window.AR_CONFIG = {
     links: [
       {
         href: 'https://blog.juangalt.com/p/an-art-project-ive-worked-on',
-        label: 'About the project',
+        label: 'About PEPETHUGLIFE',
+      },
+      {
+        href: 'https://satochip.io/',
+        label: 'Satochip',
       },
       {
         href: 'https://github.com/realjuangalt/pepethuglife-ar',

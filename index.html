@@ -46,36 +46,35 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        #audio-gate {
+        .audio-toggle {
             position: fixed;
-            left: 50%;
-            bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-            transform: translateX(-50%);
-            z-index: 1002;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: rgba(33, 150, 243, 0.22);
-            color: rgba(255,255,255,0.95);
-            font-size: 13px;
-            letter-spacing: 0.01em;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+            z-index: 2500;
+            bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            right: calc(16px + env(safe-area-inset-right, 0px));
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 50%;
+            background: rgba(0,0,0,0.38);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            line-height: 1;
+            display: grid;
+            place-items: center;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-        #audio-gate:active {
-            background: rgba(33, 150, 243, 0.3);
+        .audio-toggle:active {
+            background: rgba(0,0,0,0.5);
         }
-        #audio-gate::before {
-            content: "🔊";
-            font-size: 14px;
-            line-height: 1;
+        .audio-toggle:focus-visible {
+            outline: 2px solid rgba(33, 150, 243, 0.8);
+            outline-offset: 2px;
         }
 
         /* Subtle burger — bottom left, above safe area */
@@ -183,7 +182,7 @@
 <body>
     <p id="media-error" hidden></p>
     <p id="loading-full" role="status" aria-live="polite"></p>
-    <div id="audio-gate" role="button" tabindex="0" aria-label="Tap to enable sound">Tap to enable sound</div>
+    <button type="button" id="audio-toggle" class="audio-toggle" aria-pressed="true" aria-label="Sound on" title="Sound on">🔊</button>
 
     <!-- imageTargetSrc must match AR_CONFIG.marker.src; maxTrack ≥ number of targets -->
     <a-scene
@@ -198,7 +197,11 @@
         <!-- Targets are injected from config.js by ar-app.js -->
     </a-scene>
 
-    <button type="button" id="menu-burger" class="menu-burger" aria-label="Menu" aria-expanded="false" aria-controls="menu-panel" hidden></button>
+    <button type="button" id="menu-burger" class="menu-burger" aria-label="Menu" aria-expanded="false" aria-controls="menu-panel" hidden>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+    </button>
     <div id="menu-panel" class="menu-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Links" hidden>
         <header>
             <button type="button" id="menu-close" class="menu-close" aria-label="Close">×</button>
