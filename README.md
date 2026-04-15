@@ -29,7 +29,7 @@ Custom domain: keep **`CNAME`** at the repo root (e.g. `www.pepethuglife.lol`). 
 
 ## Configuration
 
-1. **Compile** `media/targets.mind` with the [MindAR compiler](https://hiukim.github.io/mind-ar-js-doc/tools/compile) from your **print** reference image(s). Target order must match `AR_CONFIG.markers[].targetIndex` (0 = first image in the compiler).
+1. **Compile** `targets.mind` with the [MindAR compiler](https://hiukim.github.io/mind-ar-js-doc/tools/compile) from your **print** reference image(s). Target order must match `AR_CONFIG.markers[].targetIndex` (0 = first image in the compiler).
 
 2. **Keep paths aligned:** the same `targets.mind` path must appear in:
    - `index.html` → `mindar-image` → `imageTargetSrc`

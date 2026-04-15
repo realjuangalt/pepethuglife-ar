@@ -43,6 +43,107 @@
             .controls { bottom: 16px; }
             .controls button { font-size: 14px; padding: 12px 22px; }
         }
+
+        /* Subtle burger — bottom left, above safe area */
+        .menu-burger {
+            position: fixed;
+            z-index: 2500;
+            bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            left: calc(16px + env(safe-area-inset-left, 0px));
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 50%;
+            background: rgba(0,0,0,0.38);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .menu-burger span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: rgba(255,255,255,0.88);
+            border-radius: 1px;
+        }
+        .menu-burger:focus-visible {
+            outline: 2px solid rgba(33, 150, 243, 0.8);
+            outline-offset: 2px;
+        }
+
+        .menu-panel {
+            position: fixed;
+            inset: 0;
+            z-index: 2600;
+            display: flex;
+            flex-direction: column;
+            padding: calc(1rem + env(safe-area-inset-top)) calc(1.25rem + env(safe-area-inset-right))
+                calc(1.5rem + env(safe-area-inset-bottom)) calc(1.25rem + env(safe-area-inset-left));
+            background: rgba(10, 12, 16, 0.97);
+            color: #e8eaed;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .menu-panel.is-open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .menu-panel header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.5rem;
+        }
+        .menu-close {
+            min-width: 48px;
+            min-height: 48px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .menu-close:focus-visible {
+            outline: 2px solid rgba(33, 150, 243, 0.8);
+        }
+        .menu-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.25rem;
+            max-width: 22rem;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .menu-nav a {
+            display: block;
+            padding: 1.1rem 1.25rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            color: #e8eaed;
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .menu-nav a:active {
+            background: rgba(255,255,255,0.1);
+        }
+        body.menu-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -52,36 +153,27 @@
     <!-- imageTargetSrc must match AR_CONFIG.marker.src; maxTrack ≥ number of targets -->
     <a-scene
         id="ar-scene"
-        mindar-image="imageTargetSrc: ./media/targets.mind; maxTrack: 1; missTolerance: 80; warmupTolerance: 8; filterMinCF: 0.00001; filterBeta: 10000; uiLoading: yes; uiScanning: yes; uiError: yes;"
+        mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1; missTolerance: 80; warmupTolerance: 8; filterMinCF: 0.001; filterBeta: 1000; uiLoading: yes; uiScanning: yes; uiError: yes;"
         vr-mode-ui="enabled: false"
         xr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
         renderer="antialias: true; physicallyCorrectLights: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-assets>
-            <video
-                id="video-0"
-                crossorigin="anonymous"
-                playsinline
-                webkit-playsinline
-                preload="auto"
-                muted
-                loop></video>
-        </a-assets>
-        <a-entity id="target-0" mindar-image-target="targetIndex: 0">
-            <a-video
-                id="plane-0"
-                src="#video-0"
-                width="1"
-                height="1.3975"
-                position="0 0 0.01"
-                rotation="0 0 0"></a-video>
-        </a-entity>
+        <a-assets id="ar-assets"></a-assets>
+        <!-- Targets are injected from config.js by ar-app.js -->
     </a-scene>
 
     <div class="controls">
         <button type="button" id="play-full-btn" disabled onclick="window.beginFullPlayback()">Full song</button>
         <button type="button" id="stop-btn" onclick="window.stopFullPlayback()" title="Stop">✋</button>
+    </div>
+
+    <button type="button" id="menu-burger" class="menu-burger" aria-label="Menu" aria-expanded="false" aria-controls="menu-panel" hidden></button>
+    <div id="menu-panel" class="menu-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Links" hidden>
+        <header>
+            <button type="button" id="menu-close" class="menu-close" aria-label="Close">×</button>
+        </header>
+        <nav id="menu-nav" class="menu-nav" aria-label="External links"></nav>
     </div>
 
     <script src="./ar-app.js"></script>

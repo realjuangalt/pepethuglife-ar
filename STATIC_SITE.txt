@@ -26,8 +26,8 @@ Compile ALL reference images you need into ONE .mind file, in the same order as
 targetIndex in config.js (0 = first image in the compiler).
 
 1. Compiler: https://hiukim.github.io/mind-ar-js-doc/tools/compile
-2. Save as media/targets.mind
+2. Save as targets.mind
 3. Same path in AR_CONFIG.marker.src and index.html mindar-image imageTargetSrc
-4. maxTrack in index.html must be >= number of targets
+4. maxTrack in index.html is auto-set at runtime from config.js
 
 Docs: https://hiukim.github.io/mind-ar-js-doc/

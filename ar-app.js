@@ -9,6 +9,10 @@
 
   window.AR_HOOKS = window.AR_HOOKS || {};
 
+  function getSceneEl() {
+    return document.getElementById('ar-scene') || document.querySelector('a-scene');
+  }
+
   function runHook(name) {
     const h = window.AR_HOOKS[name];
     if (typeof h === 'function') {
@@ -83,6 +87,89 @@
       if (visible[ix]) return ix;
     }
     return null;
+  }
+
+  function parseMindarAttr(str) {
+    const out = {};
+    if (!str) return out;
+    str.split(';').forEach(function (chunk) {
+      const c = chunk.trim();
+      if (!c) return;
+      const parts = c.split(':');
+      const key = (parts.shift() || '').trim();
+      const value = parts.join(':').trim();
+      if (!key) return;
+      out[key] = value;
+    });
+    return out;
+  }
+
+  function serializeMindarAttr(obj) {
+    return Object.keys(obj)
+      .map(function (k) {
+        return k + ': ' + obj[k];
+      })
+      .join('; ');
+  }
+
+  function ensureDomForMarkers() {
+    const scene = getSceneEl();
+    if (!scene) return;
+
+    let assets = document.getElementById('ar-assets');
+    if (!assets) {
+      assets = document.createElement('a-assets');
+      assets.id = 'ar-assets';
+      scene.appendChild(assets);
+    }
+
+    const attr = parseMindarAttr(scene.getAttribute('mindar-image'));
+    if (C.marker && C.marker.src) {
+      attr.imageTargetSrc = C.marker.src;
+    }
+    const maxIndex = Math.max.apply(
+      null,
+      C.markers.map(function (m) {
+        return m.targetIndex;
+      })
+    );
+    attr.maxTrack = String(Math.max(1, maxIndex + 1));
+    scene.setAttribute('mindar-image', serializeMindarAttr(attr));
+
+    C.markers.forEach(function (m) {
+      const idx = m.targetIndex;
+
+      let vid = getVideoEl(idx);
+      if (!vid) {
+        vid = document.createElement('video');
+        vid.id = 'video-' + idx;
+        vid.setAttribute('crossorigin', 'anonymous');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
+        vid.setAttribute('preload', 'auto');
+        vid.muted = true;
+        vid.loop = true;
+        assets.appendChild(vid);
+      }
+
+      let target = document.getElementById('target-' + idx);
+      if (!target) {
+        target = document.createElement('a-entity');
+        target.id = 'target-' + idx;
+        target.setAttribute('mindar-image-target', 'targetIndex: ' + idx);
+
+        const plane = document.createElement('a-video');
+        plane.id = 'plane-' + idx;
+        plane.setAttribute('src', '#video-' + idx);
+        plane.setAttribute('position', '0 0 0.01');
+        plane.setAttribute('rotation', '0 0 0');
+        plane.setAttribute('width', '1');
+        plane.setAttribute('height', '1');
+
+        target.appendChild(plane);
+        scene.appendChild(target);
+      }
+    });
   }
 
   function applyPlane(idx) {
@@ -319,9 +406,56 @@
     runHook('afterStop');
   }
 
+  function initMenu() {
+    const burger = document.getElementById('menu-burger');
+    const panel = document.getElementById('menu-panel');
+    const nav = document.getElementById('menu-nav');
+    const closeBtn = document.getElementById('menu-close');
+    if (!burger || !panel || !nav) return;
+
+    const links = (C.menu && C.menu.links) || [];
+    if (links.length === 0) return;
+
+    links.forEach(function (item) {
+      if (!item || !item.href) return;
+      const a = document.createElement('a');
+      a.href = item.href;
+      a.textContent = item.label || item.href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      nav.appendChild(a);
+    });
+
+    burger.removeAttribute('hidden');
+    panel.removeAttribute('hidden');
+    burger.setAttribute('aria-label', (C.ui && C.ui.menuOpen) || 'Menu');
+
+    function setOpen(open) {
+      panel.classList.toggle('is-open', open);
+      panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      document.body.classList.toggle('menu-open', open);
+    }
+
+    burger.addEventListener('click', function () {
+      setOpen(true);
+    });
+    closeBtn.addEventListener('click', function () {
+      setOpen(false);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && panel.classList.contains('is-open')) {
+        setOpen(false);
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    ensureDomForMarkers();
     applyConfigToDom();
     wireMindarTargets();
+    initMenu();
   });
 
   window.beginFullPlayback = beginFullPlayback;

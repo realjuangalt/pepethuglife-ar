@@ -11,7 +11,7 @@ window.AR_CONFIG = {
   title: 'Pepe Thug Life AR',
 
   marker: {
-    src: './media/targets.mind',
+    src: './targets.mind',
   },
 
   /**
@@ -34,6 +34,22 @@ window.AR_CONFIG = {
         rotation: '0 0 0',
       },
     },
+    {
+      targetIndex: 1,
+      label: 'SHADILAYTHUG',
+      loop: {
+        src: './media/SHADILAYTHUG-loop.mp4',
+      },
+      full: {
+        src: './media/SHADILAYTHUG & PEPETHUGLIFE - full song.mp4',
+      },
+      plane: {
+        width: 1,
+        height: 1.3925,
+        position: '0 0 0.01',
+        rotation: '0 0 0',
+      },
+    },
   ],
 
   ui: {
@@ -41,5 +57,25 @@ window.AR_CONFIG = {
     stop: 'Stop',
     loadingFull: 'Loading full video…',
     pointAtCard: 'Point camera at a card',
+    menuOpen: 'Menu',
+    menuClose: 'Close menu',
+  },
+
+  /** Full-screen menu (burger, bottom-left). Opens links in a new tab. */
+  menu: {
+    links: [
+      {
+        href: 'https://blog.juangalt.com/p/an-art-project-ive-worked-on',
+        label: 'About the project',
+      },
+      {
+        href: 'https://github.com/realjuangalt/pepethuglife-ar',
+        label: 'GitHub repository',
+      },
+      {
+        href: 'https://juangalt.com',
+        label: 'Artist — juangalt.com',
+      },
+    ],
   },
 };
