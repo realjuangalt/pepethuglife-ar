@@ -38,6 +38,7 @@
   let lastFoundIndex = 0;
   const fullReady = {};
   const fullLoading = {};
+  let audioEnabled = false;
 
   function removeVRButton() {
     document.querySelectorAll('.a-enter-vr, .a-enter-vr-button, .a-enter-vr-fullscreen').forEach(function (el) {
@@ -64,12 +65,18 @@
     const el = document.getElementById('loading-full');
     if (!el) return;
     if (show) {
-      el.style.display = 'block';
+      el.style.display = 'inline-flex';
       el.textContent = text || (C.ui && C.ui.loadingFull) || 'Loading…';
     } else {
       el.style.display = 'none';
       el.textContent = '';
     }
+  }
+
+  function setAudioGate(show) {
+    const el = document.getElementById('audio-gate');
+    if (!el) return;
+    el.style.display = show ? 'inline-flex' : 'none';
   }
 
   function pickVisibleTargetIndex() {
@@ -151,7 +158,8 @@
         fullVid.setAttribute('crossorigin', 'anonymous');
         fullVid.setAttribute('playsinline', '');
         fullVid.setAttribute('webkit-playsinline', '');
-        fullVid.setAttribute('preload', 'auto');
+        // Start with metadata only; switch to auto when a target is found.
+        fullVid.setAttribute('preload', 'metadata');
         // Start muted; we will try to unmute when playing.
         fullVid.muted = true;
         fullVid.loop = false;
@@ -272,6 +280,7 @@
     const fullUrl = resolveUrl(m.full.src);
     fullVid.muted = true; // start muted, try to unmute when playing
     fullVid.loop = false;
+    fullVid.preload = 'auto';
     if (fullVid.src !== fullUrl) {
       fullVid.src = fullUrl;
       fullVid.load();
@@ -290,11 +299,15 @@
       switchPlaneToFull(idx);
       showLoadingForIndex(idx, false);
 
-      // Try to play with audio; if blocked, fall back to muted playback.
-      fullVid.muted = false;
-      fullVid.play().catch(function () {
+      if (audioEnabled) {
+        fullVid.muted = false;
+      } else {
+        setAudioGate(true);
         fullVid.muted = true;
-        fullVid.play().catch(function () {});
+      }
+
+      fullVid.play().catch(function () {
+        // Autoplay may be blocked; user gesture will retry via audio gate.
       });
     };
 
@@ -326,6 +339,35 @@
 
     switchPlaneToLoop(idx);
     showLoadingForIndex(idx, false);
+  }
+
+  function tryEnableAudioAndResume() {
+    audioEnabled = true;
+    setAudioGate(false);
+
+    const idx = pickVisibleTargetIndex();
+    if (idx === null) return;
+    const fullVid = getFullVideoEl(idx);
+    if (!fullVid || !fullReady[idx]) return;
+
+    switchPlaneToFull(idx);
+    fullVid.muted = false;
+    fullVid.play().catch(function () {});
+  }
+
+  function initAudioGate() {
+    const el = document.getElementById('audio-gate');
+    if (!el) return;
+    if (C.ui && C.ui.audioGate) {
+      el.textContent = C.ui.audioGate;
+    }
+    function onActivate() {
+      tryEnableAudioAndResume();
+    }
+    el.addEventListener('click', onActivate);
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') onActivate();
+    });
   }
 
   function wireMindarTargets() {
@@ -402,6 +444,7 @@
     ensureDomForMarkers();
     applyConfigToDom();
     wireMindarTargets();
+    initAudioGate();
     initMenu();
   });
 })();

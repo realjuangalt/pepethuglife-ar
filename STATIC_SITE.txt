@@ -13,7 +13,9 @@ in-browser image tracking.
 Media model (two-phase)
 ------------------------
 - Phase 1: small muted loop MP4s per marker (fast; autoplay when tracked).
-- Phase 2: large full-song MP4s; loaded after the user taps "Full song".
+- Phase 2: full-song MP4s (web encode: H.264/AAC, +faststart). Preload when the
+  marker is tracked; loader until can play. Unmuted audio: user taps once if the
+  browser blocks autoplay with sound.
 
 Paths are set in config.js under AR_CONFIG.markers (loop + full).
 

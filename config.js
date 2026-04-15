@@ -5,7 +5,8 @@
  *   https://hiukim.github.io/mind-ar-js-doc/tools/compile
  *
  * Phase 1 — Lightweight loops (GIF → MP4): autoplay muted when the marker is seen.
- * Phase 2 — Full clips: user taps "Full song"; large files load on demand (see ar-app.js).
+ * Phase 2 — Full clips: preloaded when marker is tracked; web-optimized MP4 (+faststart).
+ * Audio: browsers require a user gesture for unmuted playback — tap "Tap to enable sound" once.
  */
 window.AR_CONFIG = {
   title: 'Pepe Thug Life AR',
@@ -25,7 +26,7 @@ window.AR_CONFIG = {
         src: './media/PEPETHUGLIFE-loop.mp4',
       },
       full: {
-        src: './media/PEPETHUGLIFE snoop dog DRE edition artivive smoke.mp4',
+        src: './media/PEPETHUGLIFE-full-web.mp4',
       },
       plane: {
         width: 1,
@@ -41,7 +42,7 @@ window.AR_CONFIG = {
         src: './media/SHADILAYTHUG-loop.mp4',
       },
       full: {
-        src: './media/SHADILAYTHUG & PEPETHUGLIFE - full song.mp4',
+        src: './media/SHADILAYTHUG-full-web.mp4',
       },
       plane: {
         width: 1,
@@ -53,10 +54,9 @@ window.AR_CONFIG = {
   ],
 
   ui: {
-    playFull: 'Full song',
-    stop: 'Stop',
     loadingFull: 'Loading full video…',
     pointAtCard: 'Point camera at a card',
+    audioGate: 'Tap to enable sound',
     menuOpen: 'Menu',
     menuClose: 'Close menu',
   },
