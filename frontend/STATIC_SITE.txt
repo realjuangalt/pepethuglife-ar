@@ -3,41 +3,38 @@ What visitors load (GitHub Pages)
 Only files under this folder should be published. In the repo: Settings → Pages →
 Build from branch "main", folder "/frontend".
 
-The live site loads: index.html, config.js, ar-app.js, lib/*.js, and media/*.
-There is no Python, no Flask, and no request to a server-side AI stack.
+Site root (/) serves index.html — placeholder landing until the public launch.
+The AR experience lives at /ar.html (same directory as config.js, ar-app.js, lib/, media/).
+
+The live site loads: index.html, ar.html, config.js, ar-app.js, lib/*.js, and media/*.
+There is no Python, no Flask, and no server-side AI stack.
 
 The MindAR library (lib/mindar-image-aframe.prod.js) includes TensorFlow.js for
-image tracking on the GPU. That is normal for MindAR and is not your old backend;
-it runs entirely in the browser for marker detection.
+image tracking on the GPU. That runs entirely in the browser for marker detection.
 
-The "backend/" folder at the repo root is legacy/upstream code. It is not
-deployed when Pages uses the "/frontend" folder, and the static site does not
-import it.
+The "backend/" folder at the repo root is legacy. It is not deployed when Pages
+uses the "/frontend" folder.
 
-Where to put the projected video
---------------------------------
-Place the file here:
+Media model (two-phase)
+------------------------
+- Phase 1: small muted loop MP4s per marker (fast to load; autoplay when tracked).
+- Phase 2: large full-song MP4s; loaded only after the user taps "Full song".
 
-  frontend/media/video.mp4
+Paths and filenames are set in config.js under AR_CONFIG.markers (loop + full).
 
-If you use another name or path, set AR_CONFIG.video.src in config.js and keep
-the same path in sync if you reference it elsewhere.
+GIFs: convert to MP4 for loops (see ../scripts/convert-gif-loops.sh). The AR
+plane uses <video>, not raw GIF.
 
-New marker / targets.mind
--------------------------
-MindAR needs a compiled target file (.mind) built from your printed marker image.
+targets.mind (multiple images)
+------------------------------
+Compile ALL reference images you need into ONE .mind file, in the same order as
+targetIndex in config.js (0 = first image added in the compiler, etc.).
 
-1. Prepare one clear reference image (often the same artwork as the physical print).
-2. Compile it to .mind using the official browser tool:
-   https://hiukim.github.io/mind-ar-js-doc/tools/compile
-   (Documented in the MindAR repo: "Target Images Compiler".)
-
-3. Download/save the generated .mind file as:
-
-  frontend/media/targets.mind
-
-4. Keep these in sync (same path):
+1. Use the official compiler: https://hiukim.github.io/mind-ar-js-doc/tools/compile
+2. Save as frontend/media/targets.mind
+3. Keep the same path in:
    - AR_CONFIG.marker.src in config.js
-   - The mindar-image="imageTargetSrc: ..." attribute in index.html
+   - mindar-image="imageTargetSrc: ..." in index.html
+4. maxTrack in index.html must be >= number of targets (this project uses 2).
 
-Official docs index: https://hiukim.github.io/mind-ar-js-doc/
+Official docs: https://hiukim.github.io/mind-ar-js-doc/

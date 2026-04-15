@@ -2,77 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>AR presentation</title>
-    <!-- Static build: deploy this folder (e.g. GitHub Pages). Media paths: config.js -->
-    <script src="./config.js"></script>
-    <script src="./lib/aframe.min.js"></script>
-    <script src="./lib/mindar-image-aframe.prod.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Pepe Thug Life — marker-based AR experience (coming soon).">
+    <title>Pepe Thug Life AR — Coming soon</title>
     <style>
-        * { box-sizing: border-box; touch-action: manipulation; }
-        body { margin: 0; font-family: system-ui, sans-serif; }
-        #media-error {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            max-width: 90vw; padding: 1rem 1.25rem; background: rgba(0,0,0,0.75); color: #fff;
-            border-radius: 8px; font-size: 14px; line-height: 1.4; z-index: 2000; text-align: center;
+        :root {
+            --bg: #0d0f12;
+            --text: #e8eaed;
+            --muted: #9aa0a6;
+            --accent: #c9a227;
+            --card: #161a20;
         }
-        .controls {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: flex; gap: 12px; align-items: center;
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            line-height: 1.5;
         }
-        .controls button {
-            min-height: 48px; min-width: 48px; border: none; border-radius: 24px;
-            cursor: pointer; font-size: 15px; font-weight: 600; padding: 14px 28px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        main {
+            max-width: 28rem;
+            width: 100%;
+            text-align: center;
         }
-        #play-btn { background: #2196f3; color: #fff; }
-        #stop-btn {
-            display: none; background: rgba(244, 67, 54, 0.9); color: #fff;
-            font-size: 22px; padding: 14px 20px;
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 1.85rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0 0 0.5rem;
         }
-        @media (max-width: 480px) {
-            .controls { bottom: 16px; }
-            .controls button { font-size: 14px; padding: 12px 22px; }
+        p.lead {
+            color: var(--muted);
+            font-size: 1rem;
+            margin: 0 0 1.75rem;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .card p {
+            margin: 0;
+            font-size: 0.9375rem;
+            color: var(--muted);
+        }
+        nav {
+            margin-top: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        a.btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 1.5rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            color: var(--bg);
+            background: var(--accent);
+            transition: opacity 0.15s ease;
+        }
+        a.btn:hover { opacity: 0.92; }
+        a.link {
+            color: var(--muted);
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+        a.link:hover { color: var(--text); text-decoration: underline; }
+        footer {
+            margin-top: 2.5rem;
+            font-size: 0.8125rem;
+            color: var(--muted);
         }
     </style>
 </head>
 <body>
-    <p id="media-error" hidden></p>
-
-    <!-- Keep imageTargetSrc in sync with AR_CONFIG.marker.src in config.js -->
-    <a-scene
-        id="ar-scene"
-        mindar-image="imageTargetSrc: ./media/targets.mind; maxTrack: 1; missTolerance: 80; warmupTolerance: 8; filterMinCF: 0.00001; filterBeta: 10000; uiLoading: yes; uiScanning: yes; uiError: yes;"
-        vr-mode-ui="enabled: false"
-        xr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false"
-        renderer="antialias: true; physicallyCorrectLights: false">
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-assets>
-            <video
-                id="source-video"
-                crossorigin="anonymous"
-                playsinline
-                webkit-playsinline
-                preload="auto"
-                muted></video>
-        </a-assets>
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-video
-                id="marker-plane"
-                src="#source-video"
-                width="1"
-                height="0.5625"
-                position="0 0 0.01"
-                rotation="0 0 0"></a-video>
-        </a-entity>
-    </a-scene>
-
-    <div class="controls">
-        <button type="button" id="play-btn" onclick="window.beginPlayback()">Play</button>
-        <button type="button" id="stop-btn" onclick="window.stopPlayback()" title="Stop">✋</button>
-    </div>
-
-    <script src="./ar-app.js"></script>
+    <main>
+        <h1>Pepe Thug Life AR</h1>
+        <p class="lead">Something new is on the way. The full site and experience are still in progress.</p>
+        <div class="card">
+            <p>Point your phone at printed cards and watch the show — static AR, no server required. We’re finishing media, markers, and polish before the public launch.</p>
+        </div>
+        <nav>
+            <a class="btn" href="./ar.html">Preview AR (beta)</a>
+            <a class="link" href="https://github.com/realjuangalt/pepethuglife-ar">Source on GitHub</a>
+        </nav>
+        <footer>GitHub Pages · pepethuglife-ar</footer>
+    </main>
 </body>
 </html>

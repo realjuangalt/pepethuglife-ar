@@ -1,618 +1,90 @@
-# Talking Orange - Bitcoin AR Experience
+# pepethuglife-static-ar
 
-An augmented reality application that brings a 3D talking orange character to life through marker-based AR and voice interaction, designed for Bitcoin education and evangelism.
+**Primary goal:** ship a **fully static** site on **GitHub Pages** so the experience runs **without you operating any server**—no VPS, no Flask, no process to keep alive. Pushing to the repo and pointing Pages at `frontend/` is enough for production.
 
-## 🎯 Project Overview
+A **stripped-down** marker-based AR page: point a phone camera at a **specific printed image**, see a **video** mapped onto that marker, and play **video audio** or an optional **separate audio file**. There is **no AI**, no speech-to-text, and no server-side pipeline in the deployed experience.
 
-This project creates an AR experience where users:
-1. Point their camera at a printed talking orange marker (credit card-sized)
-2. See a 3D talking orange character projected onto the marker
-3. Interact with the character through voice commands about Bitcoin
-4. Receive audio responses with synchronized mouth animations
-5. Can stop audio playback at any time with the stop button
+This repo keeps the **same general idea** as an earlier, fuller project (printed target + AR presentation), but the implementation only supports **a small set of compiled targets and media** you configure in one place.
 
-## 🛠️ Technology Stack
+## What it does
 
-### Frontend
-- **HTML5, CSS3, Vanilla JavaScript** - Web Standards
-- **MindAR** - Modern marker-based AR framework (MIT License)
-- **A-Frame** - Web framework for VR/AR (MIT License)
-- **Three.js** - 3D rendering (MIT License)
-- **MediaRecorder API** - Audio recording
-- **Web Audio API** - Audio playback
+1. **Image tracking** — [MindAR](https://github.com/hiukim/mind-ar-js) detects one of your compiled markers in `targets.mind` (this project is set up for **two** targets: Pepe + Shadilay).
+2. **Video projection** — Each marker has its own `<a-video>` plane with a **short, muted loop** (Phase 1) so the experience starts quickly on GitHub Pages.
+3. **Full clips** — The user can tap **Full song** to load and play a **large MP4 with audio** (Phase 2) on demand—files are not fully preloaded until then, which avoids blocking the first paint on big assets (~30MB+).
 
-### Backend
-- **Python 3.8+** - Runtime environment
-- **Flask** - Web framework (BSD License)
-- **Whisper** - OpenAI's speech-to-text (MIT License)
-- **Venice AI API** - LLM for Bitcoin responses
-- **Text-to-Speech** - Multiple TTS engines (espeak, festival, pico2wave, Venice AI)
+**GIFs** are not used directly on the AR plane: they are converted to **small MP4 loops** (`scripts/convert-gif-loops.sh`) because WebGL video textures expect `<video>` sources; animated GIFs on a plane usually show a single frame.
 
-### AR Assets
-- **Custom PNG Images** - Talking orange character with animation frames
-- **MindAR Targets** - Compiled `.mind` files for marker detection
-- **Frame Animations** - 145 frames for talking and thinking animations
+Everything runs **in the browser** from static files. GitHub Pages (or any static host) only serves HTML, JS, and media—there is **no backend in production**.
 
-## ✅ Current Features
+## Technology
 
-### AR System
-- ✅ **Marker Detection** - MindAR successfully detects credit card-sized markers
-- ✅ **Image Projection** - Talking orange character projects onto marker
-- ✅ **Tracking Stability** - Optimized for 1-2 feet viewing distance
-- ✅ **Smoothing & Hysteresis** - Reduces wobble and maintains visibility during brief losses
-- ✅ **Comprehensive Logging** - Detailed tracking, position, and rotation logs
+| Piece | Role |
+|--------|------|
+| HTML / CSS / vanilla JS | UI and wiring |
+| [A-Frame](https://aframe.io/) | Scene and video entity |
+| MindAR (image target) | Marker tracking (uses TensorFlow.js inside the MindAR bundle for tracking math in the browser) |
+| MP4 / optional MP3 | Media you supply under `frontend/media/` |
 
-### Voice System
-- ✅ **Speech-to-Text** - Whisper integration (supports small/medium models)
-- ✅ **GPU/CPU Support** - Auto-detects GPU, falls back to CPU automatically
-- ✅ **GPU Memory Management** - Handles CUDA out-of-memory gracefully
-- ✅ **Model Management** - Automatic model downloading to `backend/models/`
-- ✅ **LLM Integration** - Venice AI for Bitcoin evangelism responses
-- ✅ **Text-to-Speech** - Multiple TTS engines (espeak, festival, pico2wave) with fallback
-- ✅ **Audio Playback** - MP3 audio responses with volume control and stop button
-- ✅ **Error Handling** - Comprehensive error logging and user-friendly messages
-
-### Animation System
-- ✅ **Talking Animation** - 145-frame animation synchronized with audio
-- ✅ **Thinking Animation** - 145-frame animation for processing state
-- ✅ **Idle State** - Smile/wink states when not active
-- ✅ **Frame-based Animations** - Advanced mode with texture preloading
-- ✅ **Image-based Fallback** - Simple mode if frames not available
-
-### UI Features
-- ✅ **Ask Question Button** - Voice recording with visual feedback
-- ✅ **Stop Button** - Interrupt audio playback (appears during speech)
-- ✅ **Language Toggle** - English/Spanish support
-- ✅ **Test Buttons** - Manual animation testing
-- ✅ **Mobile Responsive** - Touch-friendly controls
-
-### Debugging & Monitoring
-- ✅ **Frontend Logging** - 168+ console.log statements for debugging
-- ✅ **Backend Logging** - Comprehensive server-side logs
-- ✅ **Tracking Debug Tools** - `window.trackingDebug` API for console
-- ✅ **Animation Debug** - `window.animationModule` access
-- ✅ **Health Check API** - `/api/health` for system status
-
-## 📁 Project Structure
+## Repository layout
 
 ```
-talking-orange/
-├── frontend/
-│   ├── index.html              # Main AR application
-│   ├── lib/                     # Pre-bundled AR libraries
-│   │   ├── aframe.min.js
-│   │   └── mindar-image-aframe.prod.js
-│   └── media/
-│       ├── targets.mind         # MindAR marker file
-│       ├── talking-orange-*.png # Character images
-│       └── videos/
-│           ├── talking-orange-talking-animation/  # 145 frames + audio
-│           └── talking-orange-thinking-animation/ # 145 frames + audio
-├── backend/
-│   ├── app.py                   # Flask server
-│   ├── gen/                     # Voice processing modules
-│   │   ├── main.py             # Main voice system
-│   │   ├── voice_to_text.py    # Whisper STT
-│   │   ├── text_to_voice.py    # TTS engines
-│   │   └── text_generator.py   # LLM integration
-│   ├── models/                  # Whisper models (small.pt, medium.pt)
-│   └── voices/                  # TTS voice files
-├── start.sh                     # Production server script
-├── start_local.sh               # Development server with options
-├── install.sh                   # Installation script
-├── requirements-python.txt      # Python dependencies
-└── README.md
+├── frontend/                 # Static site — this is what you deploy
+│   ├── index.html          # Placeholder landing (root URL on Pages)
+│   ├── ar.html             # A-Frame + MindAR scene
+│   ├── config.js           # Video path, marker path, plane size, copy
+│   ├── ar-app.js           # Loop on track, full clip on demand, AR_HOOKS
+│   ├── lib/                # aframe + mindar-image (vendored)
+│   └── media/              # targets.mind, video, optional audio
+├── backend/                # Legacy Python stack — not used by the static Pages deploy
+├── package.json            # Metadata; "build" is a no-op reminder for static deploy
+└── …                       # install/start scripts for optional local backend work
 ```
 
-## 🚀 Getting Started
+For deployment details and path sync rules, see `frontend/STATIC_SITE.txt` and `frontend/media/README.txt`.
 
-### Prerequisites
-- **Linux** (Debian or Ubuntu - tested on both)
-- **Python 3.8+**
-- **FFmpeg** (for audio processing)
-- **TTS engines** (espeak, festival, pico2wave - installed by install.sh)
-- **Modern web browser** with camera/microphone support
-- **HTTPS or localhost** (required for camera access)
+## Configuration
 
-### Installation
+1. **Compiled markers** — Build `frontend/media/targets.mind` with **both** reference images in a **single** compile, in the same order as `AR_CONFIG.markers[].targetIndex` (0 = first image, 1 = second). [MindAR compile tool](https://hiukim.github.io/mind-ar-js-doc/tools/compile).
+2. **Keep paths aligned** — The same `targets.mind` path must appear in:
+   - `frontend/index.html` (`mindar-image` → `imageTargetSrc`)
+   - `frontend/config.js` → `AR_CONFIG.marker.src`
+3. **Per-marker media** — In `frontend/config.js`, each entry under `markers` has:
+   - `loop` — Small muted MP4 (Phase 1), autoplay when that marker is visible.
+   - `full` — Large MP4 (Phase 2), loaded when the user taps **Full song** while that marker is tracked.
+4. **Optional hooks** — `window.AR_HOOKS` (`beforePlay`, `afterPlay`, `afterStop`) — see `config.js`.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/realjuangalt/talking-orange.git
-   cd talking-orange
-   ```
+**Large files:** Phase 2 uses progressive buffering until `canplay`. For very slow networks, a future improvement is **HLS** (`.m3u8` + segments) hosted on the same static site— not implemented here yet.
 
-2. **Run installation script**
-   ```bash
-   chmod +x install.sh
-   # If you have sudo:
-   sudo ./install.sh
-   # Or if you use su (switch to root first):
-   su -
-   ./install.sh
-   # Or if already root:
-   ./install.sh
-   ```
+## Local preview (development only)
 
-   This will:
-   - Install system dependencies (FFmpeg, TTS engines: espeak, festival, pico2wave)
-   - Create Python virtual environment
-   - Install Python packages
-   - Download AR libraries
-   - Create necessary directories
-   - Set up `backend/models/` directory
-   - Verify TTS engines are installed
+A tiny local server is **only** for testing before you push—you are not required to run anything in production.
 
-   **Important:** The install script installs TTS engines (`espeak`, `festival`, `libttspico-utils`). If you see "No TTS engines available" errors, make sure you ran the full install script.
-
-3. **Configure environment** (optional)
-   ```bash
-   cp env.example .env
-   # Edit .env with your API keys and settings
-   ```
-
-### Running the Server
-
-#### Development Mode (Recommended)
-```bash
-./start_local.sh [--device cpu|gpu] [--model small|medium]
-```
-
-**Options:**
-- `--device cpu|gpu` - Force CPU or GPU mode (default: cpu)
-- `--model small|medium` - Whisper model size (default: small)
-
-**Examples:**
-```bash
-# Default: CPU mode, small model
-./start_local.sh
-
-# GPU mode with medium model
-./start_local.sh --device gpu --model medium
-
-# CPU mode with small model (faster startup)
-./start_local.sh --device cpu --model small
-```
-
-**Features:**
-- ✅ Enables Flask debug mode (`DEBUG=true`)
-- ✅ Detailed logging
-- ✅ Auto-reload on code changes
-- ✅ Model auto-download if missing
-
-#### Production Mode (Legacy)
-```bash
-./start.sh
-```
-
-**Note:** Production mode runs with `DEBUG=false` by default. Set `DEBUG=true` in `.env` for debug mode.
-
-### Accessing the Application
-
-1. **Open browser** to `http://localhost:3000`
-2. **Grant permissions** for camera and microphone
-3. **Print the marker** from `frontend/media/talking-orange-card-base.pdf`
-4. **Point camera** at the marker (1-2 feet away)
-5. **Click "Ask Question"** to start voice interaction
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env` file in the project root:
+Serve `frontend/` over HTTP(s) (camera APIs need a secure context or localhost). For example:
 
 ```bash
-# Server Configuration
-PORT=3000
-DEBUG=true                    # Enable Flask debug mode
-
-# Whisper Configuration
-WHISPER_MODEL_NAME=small      # small or medium
-WHISPER_FORCE_CPU=true        # Force CPU mode (true/false) - REQUIRED for CPU-only servers
-
-# TTS Configuration
-# TTS engines (espeak, festival, pico2wave) are CPU-based and don't need special config
-# They are automatically detected and used in priority order
-
-# Model Directory
-MODEL_DIR=./backend/models    # Where Whisper models are stored
-
-# API Keys (if using external services)
-VENICE_KEY=your_key_here
+cd frontend && python3 -m http.server 8080
 ```
 
-### Whisper Models
+Then open `http://localhost:8080/` for the landing page, or `http://localhost:8080/ar.html` for the AR app.
 
-**Model Sizes:**
-- `small` - ~462MB, faster, good accuracy
-- `medium` - ~1.5GB, slower, better accuracy
+## GitHub Pages (production)
 
-**Model Location:**
-- Models are stored in `backend/models/`
-- Automatically downloaded on first use
-- Can be manually downloaded from [HuggingFace](https://huggingface.co/openai/whisper-medium)
+**Settings → Pages:** build from branch **`main`** (or your default), folder **`/frontend`**. GitHub serves the static files.
 
-### MindAR Configuration
+- **Landing:** `index.html` is a placeholder “coming soon” page at the site root (`https://<user>.github.io/<repo>/`).
+- **AR app:** open **`/ar.html`** for the MindAR experience (same folder as `config.js` and `media/`, so paths stay simple).
 
-AR tracking parameters in `frontend/index.html`:
-```html
-<a-scene mindar-image="
-  imageTargetSrc: ./media/targets.mind;
-  maxTrack: 1;
-  missTolerance: 60;        # Frames before considering lost
-  warmupTolerance: 5;       # Frames before first detection
-  filterMinCF: 0.00005;     # Kalman filter minimum
-  filterBeta: 5000;         # Kalman filter beta
-  ...">
-```
+Custom domains point at the same `/frontend` root; visitors see the landing first until you swap `index.html` for a full home page.
 
-**Optimized for:**
-- Credit card-sized markers
-- 1-2 feet viewing distance
-- Stable tracking with reduced wobble
+- No deploy scripts beyond git push; no runtime besides GitHub’s static CDN.
+- Visitors never load `backend/` or Python—those files stay in the repo for optional local use only.
 
-## 🐛 Debugging
+## Legacy `backend/`
 
-### Frontend Console
+The `backend/` tree is **optional** upstream/legacy code (Flask, Whisper, etc.). It is **not** part of the static AR experience described above. The root `package.json` `start` / `dev` scripts point at a Python entry if you still run that stack locally; the documented product for this repo is the **static** `frontend/`.
 
-Open browser DevTools (F12) → Console tab. You'll see:
-- 🍊 `[INIT]` - Application startup logs
-- 🎯 `[TRACKING]` - AR marker detection events
-- 📍 `[POSITION]` - Position tracking data
-- 🔄 `[ROTATION]` - Rotation tracking data
-- 🔊 `[AUDIO]` - Audio playback events
-- ⏱️ `[TIMER]` - Uptime counter (every 10 seconds)
+## Third-party licenses
 
-### Debug Tools
+MindAR, A-Frame, and Three.js are used under their respective open-source licenses. See each vendor’s repository for full license text.
 
-**In Browser Console:**
-```javascript
-// Get tracking statistics
-window.trackingDebug.getStats()
-
-// Get marker position
-window.trackingDebug.getPosition()
-
-// Get marker rotation
-window.trackingDebug.getRotation()
-
-// Clear tracking history
-window.trackingDebug.clearHistory()
-
-// Access animation module
-window.animationModule.getStatus()
-
-// Test animations
-window.testTalkingAnimation()
-window.testThinkingAnimation()
-```
-
-### Backend Logging
-
-**Server logs show:**
-- 🎤 Voice system initialization
-- 🔍 Model loading (CPU/GPU, model name)
-- 📊 API request/response times
-- ⚠️ Errors and warnings
-
-**Enable debug mode:**
-```bash
-export DEBUG=true
-./start_local.sh
-```
-
-### Health Check
-
-Check system status:
-```bash
-curl http://localhost:3000/api/health
-```
-
-Returns:
-```json
-{
-  "status": "healthy",
-  "whisper_device": {
-    "device": "cpu",
-    "use_fp16": false,
-    "model_name": "small"
-  },
-  "voice_system": {
-    "initialized": true
-  }
-}
-```
-
-## 📊 API Endpoints
-
-### Voice Processing
-- `POST /api/speech/process` - Full voice-to-voice pipeline
-- `POST /api/speech/transcribe` - Speech-to-text only
-- `POST /api/speech/synthesize` - Text-to-speech only
-
-### System
-- `GET /api/health` - System health and status
-- `GET /api/voices` - Available TTS voices
-
-### Static Files
-- `GET /` - Main application
-- `GET /<filename>` - Static assets from `frontend/`
-
-## 🎨 AR Marker
-
-**Marker File:** `frontend/media/targets.mind`
-
-**Print Instructions:**
-1. Print `frontend/media/talking-orange-card-base.pdf` at actual size
-2. Ensure good lighting and contrast
-3. Keep marker flat and visible
-4. Optimal distance: 1-2 feet from camera
-
-## 🔍 Server Diagnostics
-
-### Check Audio Permissions (Run on Server)
-
-If audio files aren't being saved, run these diagnostic commands on your server:
-
-```bash
-# Quick check
-./check_server.sh
-
-# Detailed Python diagnostic
-cd backend
-python3 check_audio_permissions.py
-```
-
-**Common fixes:**
-```bash
-# Fix permissions
-chmod 755 backend/data/ai
-chmod 755 backend/data/user
-
-# Or fix ownership
-chown -R $(whoami) backend/data
-
-# Check if directories exist
-ls -la backend/data/
-```
-
-### Install TTS Engines (If Missing)
-
-**If you see "No TTS engines available" error:**
-
-```bash
-# Check if TTS engines are installed
-which espeak festival pico2wave
-
-# If none are found, install them:
-sudo ./install_tts_engines.sh
-
-# Or manually:
-sudo apt update
-sudo apt install -y espeak festival libttspico-utils
-
-# Verify installation
-which espeak festival pico2wave
-```
-
-**After installing, restart the server:**
-```bash
-sudo systemctl restart talking-orange
-# or restart your Flask app manually
-```
-
-## 🔍 Troubleshooting
-
-### No Console Logs
-- ✅ Check browser console filters (Info, Warnings, Errors enabled)
-- ✅ Hard refresh (Ctrl+Shift+R / Cmd+Shift+R)
-- ✅ Check for JavaScript errors (red messages)
-
-### AR Marker Not Detected
-- ✅ Ensure good lighting
-- ✅ Hold marker 1-2 feet from camera
-- ✅ Keep marker flat and in focus
-- ✅ Check console for tracking logs
-
-### Audio Not Playing
-- ✅ Check browser console for audio errors
-- ✅ Verify microphone permissions
-- ✅ Check backend logs for API errors
-- ✅ Test with stop button (should appear during playback)
-
-### Model Not Downloading
-- ✅ Check `backend/models/` directory exists
-- ✅ Verify write permissions
-- ✅ Check internet connection
-- ✅ Review backend logs for download progress
-
-### Slow Performance
-- ✅ Use `small` model instead of `medium`
-- ✅ Enable GPU mode if available: `./start_local.sh --device gpu`
-- ✅ Check system resources (CPU, RAM)
-
-## 📝 Development
-
-### Code Structure
-
-**Frontend (`frontend/index.html`):**
-- Modular JavaScript architecture
-- Event-driven AR tracking
-- Frame-based animation system
-- Comprehensive logging (168+ console.log statements)
-
-**Backend (`backend/`):**
-- Flask REST API
-- Modular voice processing (`backend/gen/`)
-- Automatic model management
-- Error handling and logging
-
-### Adding Features
-
-1. **New Animation States:** Add frames to `frontend/media/videos/`
-2. **New TTS Voices:** Configure in `backend/gen/text_to_voice.py`
-3. **New Prompts:** Add to `backend/gen/prompts/`
-4. **API Endpoints:** Add routes in `backend/app.py`
-
-## 📄 License
-
-This project is proprietary. All rights reserved.
-
-**Third-party Licenses:**
-- **MIT License:** MindAR, A-Frame, Three.js, Whisper
-- **BSD License:** Flask
-- **PSF License:** Python
-
-## 🤝 Contributing
-
-This is a private project. For issues or questions, contact the maintainer.
-
-## 📚 Additional Resources
-
-- [MindAR Documentation](https://github.com/hiukim/mind-ar-js)
-- [A-Frame Documentation](https://aframe.io/docs/)
-- [Whisper Documentation](https://github.com/openai/whisper)
-- [Flask Documentation](https://flask.palletsprojects.com/)
-
----
-
-## 📊 Project Status & Next Steps
-
-### ✅ Recent Updates (2025-12-11)
-
-1. **Audio Playback Fixes**
-   - Fixed audio not playing by adding explicit volume (1.0) and muted (false) settings
-   - Enhanced audio error handling with detailed error codes and messages
-   - Added comprehensive logging for audio loading, playback, and errors
-   - Fixed audio playback for thinking, intro, and response audio
-
-2. **Backend Error Handling**
-   - Fixed `UnboundLocalError` for `traceback` and `time` variables
-   - Improved JSON parsing with better error messages
-   - Enhanced API error responses with detailed debugging information
-   - Added validation for audio data before processing
-
-3. **GPU Support & Performance**
-   - Added GPU auto-detection as default in `start_local.sh`
-   - Enhanced GPU memory checking and CUDA error handling
-   - Added automatic fallback to CPU if GPU memory is insufficient
-   - Improved logging for GPU/CPU device selection and memory status
-   - Added `PYTORCH_CUDA_ALLOC_CONF` for better memory management
-
-4. **Frontend Improvements**
-   - Enhanced error messages for API failures
-   - Added audio validation before sending to backend
-   - Improved user feedback for microphone issues
-   - Better error extraction from backend responses
-
-### ✅ Previous Updates (2025-11-29)
-
-1. **AR Tracking Stability Improvements**
-   - Enhanced smoothing with frame averaging (5-frame buffer)
-   - Added dead zone filtering (0.0005m position, 0.1° rotation)
-   - Implemented velocity-based filtering to reject noise
-   - Adjusted MindAR parameters for better stability
-
-2. **TTS Engine Fixes**
-   - Fixed espeak, festival, and pico2wave command execution
-   - Added comprehensive error logging for TTS failures
-   - Improved engine selection priority (local CPU engines first)
-
-3. **API & Network Improvements**
-   - Added 2-minute timeout to API requests (prevents hanging)
-   - Enhanced error handling for network failures
-   - Automatic thinking animation stop on API errors
-
-4. **Installation & Configuration**
-   - Fixed install script for Debian/Ubuntu compatibility
-   - Added root/sudo/su detection for package installation
-   - Fixed virtual environment path in start.sh
-
-### 🐛 Known Issues & Limitations
-
-#### ⚠️ Whisper Transcription Speed on CPU
-**Issue:** Whisper transcription can be slow on CPU-only systems.
-
-**Current Status:**
-- ✅ GPU auto-detection enabled by default
-- ✅ Automatic fallback to CPU if GPU unavailable
-- ✅ Small model used by default (faster than medium)
-- ⚠️ CPU transcription can take 10-30+ seconds depending on audio length
-
-**Optimization Tips:**
-- Use GPU when available: `./start_local.sh --device gpu`
-- Use small model (default): `./start_local.sh --model small`
-- For CPU-only: Consider using `base` model for faster responses (less accurate)
-
-#### ⚠️ Server TTS (If Issues Occur)
-**If TTS fails on server:**
-1. Check TTS engines: `which espeak festival pico2wave`
-2. Test manually: `echo "test" | espeak --stdout > /tmp/test.wav`
-3. Check permissions: `python3 backend/check_audio_permissions.py`
-4. Review server logs for detailed error messages
-
-#### ⚠️ Browser Audio Restrictions
-**Note:** Some browsers may block autoplay until user interaction. The app handles this automatically, but ensure:
-- User clicks the "Ask Question" button (triggers user interaction)
-- Browser tab is not muted
-- Audio permissions are granted
-
-### 📋 Future Enhancements
-
-**Performance Improvements:**
-- Add transcription progress feedback to UI
-- Implement audio preprocessing (silence trimming, compression)
-- Add request queuing to prevent multiple simultaneous requests
-- Consider streaming transcription for faster responses
-
-**User Experience:**
-- Add "Processing audio..." message with estimated time
-- Show transcription progress indicator
-- Add cancel button for long-running requests
-- Implement audio level visualization during recording
-
-### 🔧 Configuration Checklist
-
-**Server Configuration:**
-- [ ] `WHISPER_FORCE_CPU=true` in .env
-- [ ] `WHISPER_MODEL_NAME=small` in .env (or `base` for speed)
-- [ ] TTS engines installed and in PATH
-- [ ] Audio save directories have write permissions
-- [ ] Backend server is running and accessible
-
-**Performance Settings:**
-- [x] GPU auto-detection enabled (default)
-- [x] Small Whisper model used by default
-- [x] Automatic CPU fallback if GPU unavailable
-- [x] TTS using fastest local engine (espeak)
-- [ ] Audio compression optimized (future enhancement)
-
-### 📈 Performance Status
-
-**Current Performance:**
-- AR tracking: **Stable** ✅
-- Audio playback: **Working** ✅
-- TTS synthesis: **Working** ✅ (local engines)
-- Voice input → Response: **Varies by device** ⚠️
-  - GPU: **5-15 seconds** ✅
-  - CPU (small model): **10-30 seconds** ⚠️
-  - CPU (medium model): **30-60+ seconds** ❌
-
-**Optimization Tips:**
-- Use GPU when available for fastest transcription
-- Use small model for good balance of speed/accuracy
-- Use base model for fastest CPU performance (less accurate)
-
-### 🚀 Next Development Priorities
-
-1. **Add transcription progress feedback** (user experience)
-2. **Optimize audio preprocessing** (reduce Whisper load, faster responses)
-3. **Implement request queuing** (prevent multiple simultaneous requests)
-4. **Add audio level visualization** (better recording feedback)
-5. **Server deployment optimization** (production-ready configuration)
-
----
-
-**Last Updated:** 2025-12-11
-**Version:** 1.1
-**Status:** ✅ Core Features Working - Performance Optimizations Ongoing
+Project content and branding beyond those libraries are proprietary unless stated otherwise.

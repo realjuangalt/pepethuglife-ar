@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>AR presentation</title>
+    <script src="./config.js"></script>
+    <script src="./lib/aframe.min.js"></script>
+    <script src="./lib/mindar-image-aframe.prod.js"></script>
+    <style>
+        * { box-sizing: border-box; touch-action: manipulation; }
+        body { margin: 0; font-family: system-ui, sans-serif; }
+        #media-error {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            max-width: 90vw; padding: 1rem 1.25rem; background: rgba(0,0,0,0.75); color: #fff;
+            border-radius: 8px; font-size: 14px; line-height: 1.4; z-index: 2000; text-align: center;
+        }
+        #loading-full {
+            position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+            max-width: 90vw; padding: 0.5rem 1rem; background: rgba(0,0,0,0.65); color: #fff;
+            border-radius: 8px; font-size: 14px; z-index: 1001; display: none;
+        }
+        .controls {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+            justify-content: center; max-width: 96vw;
+        }
+        .controls button {
+            min-height: 48px; min-width: 48px; border: none; border-radius: 24px;
+            cursor: pointer; font-size: 15px; font-weight: 600; padding: 14px 28px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .controls button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        #play-full-btn { background: #2196f3; color: #fff; }
+        #stop-btn {
+            display: none; background: rgba(244, 67, 54, 0.9); color: #fff;
+            font-size: 22px; padding: 14px 20px;
+        }
+        @media (max-width: 480px) {
+            .controls { bottom: 16px; }
+            .controls button { font-size: 14px; padding: 12px 22px; }
+        }
+    </style>
+</head>
+<body>
+    <p id="media-error" hidden></p>
+    <p id="loading-full" role="status" aria-live="polite"></p>
+
+    <!-- imageTargetSrc must match AR_CONFIG.marker.src; maxTrack ≥ number of targets -->
+    <a-scene
+        id="ar-scene"
+        mindar-image="imageTargetSrc: ./media/targets.mind; maxTrack: 2; missTolerance: 80; warmupTolerance: 8; filterMinCF: 0.00001; filterBeta: 10000; uiLoading: yes; uiScanning: yes; uiError: yes;"
+        vr-mode-ui="enabled: false"
+        xr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false"
+        renderer="antialias: true; physicallyCorrectLights: false">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-assets>
+            <video
+                id="video-0"
+                crossorigin="anonymous"
+                playsinline
+                webkit-playsinline
+                preload="auto"
+                muted
+                loop></video>
+            <video
+                id="video-1"
+                crossorigin="anonymous"
+                playsinline
+                webkit-playsinline
+                preload="auto"
+                muted
+                loop></video>
+        </a-assets>
+        <a-entity id="target-0" mindar-image-target="targetIndex: 0">
+            <a-video
+                id="plane-0"
+                src="#video-0"
+                width="1"
+                height="1.3975"
+                position="0 0 0.01"
+                rotation="0 0 0"></a-video>
+        </a-entity>
+        <a-entity id="target-1" mindar-image-target="targetIndex: 1">
+            <a-video
+                id="plane-1"
+                src="#video-1"
+                width="1"
+                height="1.3925"
+                position="0 0 0.01"
+                rotation="0 0 0"></a-video>
+        </a-entity>
+    </a-scene>
+
+    <div class="controls">
+        <button type="button" id="play-full-btn" disabled onclick="window.beginFullPlayback()">Full song</button>
+        <button type="button" id="stop-btn" onclick="window.stopFullPlayback()" title="Stop">✋</button>
+    </div>
+
+    <script src="./ar-app.js"></script>
+</body>
+</html>

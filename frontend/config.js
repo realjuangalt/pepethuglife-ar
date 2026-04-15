@@ -1,38 +1,63 @@
 /**
- * Edit this file for your build. Keep marker paths aligned with index.html (mindar-image).
+ * Static AR: paths must stay in sync with index.html (mindar-image imageTargetSrc).
  *
- * Optional hooks: assign functions on window.AR_HOOKS in another script
- * (beforePlay, afterPlay, afterStop, onEnded) for analytics or extra logic.
+ * Compile targets.mind from your printed images (order = targetIndex order):
+ *   https://hiukim.github.io/mind-ar-js-doc/tools/compile
+ * Include both reference images in one .mind, e.g. PEPETHUGLIFE-target-image.png first,
+ * then SHADILAYTHUG-target-image.jpg → indices 0 and 1 respectively.
+ *
+ * Phase 1 — Lightweight loops (from GIF → MP4): autoplay muted when the marker is seen.
+ * Phase 2 — Full clips: user taps "Full song"; large files load on demand (see ar-app.js).
  */
 window.AR_CONFIG = {
-  title: 'AR presentation',
+  title: 'Pepe Thug Life AR',
 
-  video: {
-    src: './media/video.mp4',
-    loop: false,
-    mutedUntilPlay: true,
-  },
-
-  /** Set to { src: './media/audio.mp3' } to use separate audio (video track is muted). */
-  audio: null,
-
-  /** Size and pose of the video on the printed marker (meters / degrees). */
-  plane: {
-    width: 1,
-    height: 0.5625,
-    position: '0 0 0.01',
-    rotation: '0 0 0',
-  },
-
-  /**
-   * MindAR target — imageTargetSrc in index.html must match marker.src
-   */
   marker: {
     src: './media/targets.mind',
   },
 
+  /**
+   * One entry per MindAR target index (same order as in targets.mind).
+   */
+  markers: [
+    {
+      targetIndex: 0,
+      label: 'PEPETHUGLIFE',
+      loop: {
+        src: './media/PEPETHUGLIFE-loop.mp4',
+      },
+      full: {
+        src: './media/PEPETHUGLIFE snoop dog DRE edition artivive smoke.mp4',
+      },
+      plane: {
+        width: 1,
+        height: 1.3975,
+        position: '0 0 0.01',
+        rotation: '0 0 0',
+      },
+    },
+    {
+      targetIndex: 1,
+      label: 'SHADILAYTHUG',
+      loop: {
+        src: './media/SHADILAYTHUG-loop.mp4',
+      },
+      full: {
+        src: './media/SHADILAYTHUG & PEPETHUGLIFE - full song.mp4',
+      },
+      plane: {
+        width: 1,
+        height: 1.3925,
+        position: '0 0 0.01',
+        rotation: '0 0 0',
+      },
+    },
+  ],
+
   ui: {
-    play: 'Play',
+    playFull: 'Full song',
     stop: 'Stop',
+    loadingFull: 'Loading full video…',
+    pointAtCard: 'Point camera at a card',
   },
 };
