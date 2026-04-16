@@ -8,6 +8,11 @@
     <script src="./lib/aframe.min.js"></script>
     <script src="./lib/mindar-image-aframe.prod.js"></script>
     <style>
+        :root {
+            --pepe-green: #39ff14;
+            --pepe-green-soft: rgba(57, 255, 20, 0.22);
+            --pepe-green-border: rgba(57, 255, 20, 0.35);
+        }
         * { box-sizing: border-box; touch-action: manipulation; }
         body { margin: 0; font-family: system-ui, sans-serif; }
         #media-error {
@@ -73,7 +78,7 @@
             background: rgba(0,0,0,0.5);
         }
         .audio-toggle:focus-visible {
-            outline: 2px solid rgba(33, 150, 243, 0.8);
+            outline: 2px solid var(--pepe-green-border);
             outline-offset: 2px;
         }
 
@@ -107,7 +112,7 @@
             border-radius: 1px;
         }
         .menu-burger:focus-visible {
-            outline: 2px solid rgba(33, 150, 243, 0.8);
+            outline: 2px solid var(--pepe-green-border);
             outline-offset: 2px;
         }
 
@@ -119,7 +124,9 @@
             flex-direction: column;
             padding: calc(1rem + env(safe-area-inset-top)) calc(1.25rem + env(safe-area-inset-right))
                 calc(1.5rem + env(safe-area-inset-bottom)) calc(1.25rem + env(safe-area-inset-left));
-            background: rgba(10, 12, 16, 0.97);
+            background:
+                radial-gradient(900px 380px at 14% 88%, rgba(57, 255, 20, 0.08), transparent 60%),
+                rgba(10, 12, 16, 0.97);
             color: #e8eaed;
             opacity: 0;
             visibility: hidden;
@@ -148,7 +155,7 @@
             cursor: pointer;
         }
         .menu-close:focus-visible {
-            outline: 2px solid rgba(33, 150, 243, 0.8);
+            outline: 2px solid var(--pepe-green-border);
         }
         .menu-nav {
             flex: 1;
@@ -170,9 +177,21 @@
             font-size: 1.05rem;
             font-weight: 500;
             border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+        }
+        .menu-nav a:hover {
+            border-color: rgba(57, 255, 20, 0.22);
+            background: rgba(57, 255, 20, 0.06);
+            box-shadow: 0 0 0 1px rgba(57, 255, 20, 0.05) inset;
+            transform: translateY(-1px);
+        }
+        .menu-nav a:focus-visible {
+            outline: 2px solid var(--pepe-green-border);
+            outline-offset: 2px;
         }
         .menu-nav a:active {
-            background: rgba(255,255,255,0.1);
+            background: rgba(57, 255, 20, 0.1);
+            transform: translateY(0);
         }
         body.menu-open {
             overflow: hidden;

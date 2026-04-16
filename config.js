@@ -70,16 +70,16 @@ window.AR_CONFIG = {
         label: 'About PEPETHUGLIFE',
       },
       {
-        href: 'https://satochip.io/',
-        label: 'Satochip',
+        href: 'https://juangalt.com',
+        label: 'Artist — juangalt.com',
       },
       {
         href: 'https://github.com/realjuangalt/pepethuglife-ar',
         label: 'GitHub repository',
       },
       {
-        href: 'https://juangalt.com',
-        label: 'Artist — juangalt.com',
+        href: 'https://satochip.io/',
+        label: 'Satochip',
       },
     ],
   },
