@@ -337,7 +337,24 @@
     const targetEl = document.getElementById('target-' + idx);
     if (targetEl) targetEl.setAttribute('visible', true);
     playLoopForIndex(idx);
-    preloadAndMaybePlayFull(idx);
+    // If full video already loaded, resuming tracking should also resume audio/video playback.
+    // Otherwise preload and auto-play once it becomes ready.
+    if (fullReady[idx]) {
+      const fullVid = getFullVideoEl(idx);
+      if (fullVid) {
+        switchPlaneToFull(idx);
+        fullVid.muted = !audioEnabled;
+        fullVid.play().catch(function () {
+          // If unmuted autoplay is blocked, fall back to muted playback.
+          if (audioEnabled) {
+            fullVid.muted = true;
+            fullVid.play().catch(function () {});
+          }
+        });
+      }
+    } else {
+      preloadAndMaybePlayFull(idx);
+    }
   }
 
   function onTargetLost(idx) {
