@@ -29,8 +29,9 @@ window.AR_CONFIG = {
         src: './media/PEPETHUGLIFE-full-web.mp4',
       },
       plane: {
-        width: 1.06,
-        height: 1.48135,
+        width: 1,
+        height: 1.3975,
+        overscan: 1.15,
         position: '0 0 0.01',
         rotation: '0 0 0',
       },
@@ -45,8 +46,9 @@ window.AR_CONFIG = {
         src: './media/SHADILAYTHUG-full-web.mp4',
       },
       plane: {
-        width: 1.06,
-        height: 1.47605,
+        width: 1,
+        height: 1.3925,
+        overscan: 1.15,
         position: '0 0 0.01',
         rotation: '0 0 0',
       },

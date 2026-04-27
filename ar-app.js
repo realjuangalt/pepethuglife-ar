@@ -199,8 +199,9 @@
     const plane = document.getElementById('plane-' + idx);
     if (!plane) return;
     const p = m.plane;
-    if (p.width != null) plane.setAttribute('width', p.width);
-    if (p.height != null) plane.setAttribute('height', p.height);
+    const overscan = p.overscan != null ? Number(p.overscan) : 1;
+    if (p.width != null) plane.setAttribute('width', Number(p.width) * overscan);
+    if (p.height != null) plane.setAttribute('height', Number(p.height) * overscan);
     if (p.position) plane.setAttribute('position', p.position);
     if (p.rotation) plane.setAttribute('rotation', p.rotation);
   }
