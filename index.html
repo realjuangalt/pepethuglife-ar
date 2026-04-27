@@ -78,6 +78,41 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
+        /* Flashlight toggle sits above audio toggle */
+        .flashlight-toggle {
+            position: fixed;
+            z-index: 2500;
+            bottom: calc(24px + env(safe-area-inset-bottom, 0px) + 52px);
+            right: calc(16px + env(safe-area-inset-right, 0px));
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 50%;
+            background: rgba(0,0,0,0.38);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            line-height: 1;
+            display: grid;
+            place-items: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .flashlight-toggle:active {
+            background: rgba(0,0,0,0.5);
+        }
+        .flashlight-toggle:focus-visible {
+            outline: 2px solid var(--pepe-green-border);
+            outline-offset: 2px;
+        }
+        .flashlight-toggle[disabled] {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
         .audio-toggle:active {
             background: rgba(0,0,0,0.5);
         }
@@ -205,6 +240,7 @@
 <body>
     <p id="media-error" hidden></p>
     <p id="loading-full" role="status" aria-live="polite"></p>
+    <button type="button" id="flashlight-toggle" class="flashlight-toggle" aria-pressed="true" aria-label="Flashlight on" title="Flashlight on">🔦</button>
     <button type="button" id="audio-toggle" class="audio-toggle" aria-pressed="true" aria-label="Sound on" title="Sound on">🔊</button>
 
     <!-- imageTargetSrc must match AR_CONFIG.marker.src; maxTrack ≥ number of targets -->

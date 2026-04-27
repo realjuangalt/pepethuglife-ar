@@ -40,6 +40,10 @@
   const fullLoading = {};
   // Default ON; autoplay-with-sound may still require a user gesture.
   let audioEnabled = true;
+  // Default ON; torch availability depends on device/browser.
+  let flashlightEnabled = true;
+  let flashlightSupported = false;
+  let lastTorchTrack = null;
 
   function removeVRButton() {
     document.querySelectorAll('.a-enter-vr, .a-enter-vr-button, .a-enter-vr-fullscreen').forEach(function (el) {
@@ -83,6 +87,66 @@
     btn.setAttribute('aria-label', audioEnabled ? onLabel : offLabel);
     btn.setAttribute('title', audioEnabled ? onLabel : offLabel);
     btn.textContent = audioEnabled ? '🔊' : '🔇';
+  }
+
+  function setFlashlightToggleState() {
+    const btn = document.getElementById('flashlight-toggle');
+    if (!btn) return;
+    const onLabel = (C.ui && C.ui.flashlightOn) || 'Flashlight on';
+    const offLabel = (C.ui && C.ui.flashlightOff) || 'Flashlight off';
+    const unsupportedLabel = (C.ui && C.ui.flashlightUnsupported) || 'Flashlight unsupported';
+
+    if (!flashlightSupported) {
+      btn.disabled = true;
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', unsupportedLabel);
+      btn.setAttribute('title', unsupportedLabel);
+      btn.textContent = '🔦';
+      return;
+    }
+
+    btn.disabled = false;
+    btn.setAttribute('aria-pressed', flashlightEnabled ? 'true' : 'false');
+    btn.setAttribute('aria-label', flashlightEnabled ? onLabel : offLabel);
+    btn.setAttribute('title', flashlightEnabled ? onLabel : offLabel);
+    btn.textContent = '🔦';
+  }
+
+  async function applyTorchToTrack(track) {
+    if (!track) return;
+    // Only apply to the latest known track.
+    lastTorchTrack = track;
+    try {
+      const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
+      if (!caps || !caps.torch) {
+        flashlightSupported = false;
+        setFlashlightToggleState();
+        return;
+      }
+      flashlightSupported = true;
+      setFlashlightToggleState();
+      await track.applyConstraints({ advanced: [{ torch: !!flashlightEnabled }] });
+    } catch (e) {
+      // Some browsers throw even when capabilities report torch.
+      console.warn('Torch applyConstraints failed', e);
+    }
+  }
+
+  function getMindarVideoTrack() {
+    const scene = getSceneEl();
+    if (!scene) return null;
+    // MindAR A-Frame system typically exposes a video element.
+    const system = scene.systems && (scene.systems['mindar-image-system'] || scene.systems['mindar-image']);
+    const videoEl = system && (system.video || system._video);
+    const stream = videoEl && videoEl.srcObject;
+    const track = stream && stream.getVideoTracks ? stream.getVideoTracks()[0] : null;
+    return track || null;
+  }
+
+  async function refreshTorchFromMindar() {
+    const track = getMindarVideoTrack();
+    if (!track) return;
+    await applyTorchToTrack(track);
   }
 
   function pickVisibleTargetIndex() {
@@ -394,6 +458,35 @@
     });
   }
 
+  function initFlashlightToggle() {
+    const btn = document.getElementById('flashlight-toggle');
+    if (!btn) return;
+
+    // Optimistically assume supported until we probe a track.
+    setFlashlightToggleState();
+
+    btn.addEventListener('click', function () {
+      if (!flashlightSupported) return;
+      flashlightEnabled = !flashlightEnabled;
+      setFlashlightToggleState();
+      // User gesture: re-apply to last known track.
+      applyTorchToTrack(lastTorchTrack || getMindarVideoTrack());
+    });
+
+    // Torch needs a real camera track; MindAR starts camera async, so poll briefly.
+    let attempts = 0;
+    const timer = setInterval(function () {
+      attempts += 1;
+      const track = getMindarVideoTrack();
+      if (track) {
+        clearInterval(timer);
+        applyTorchToTrack(track);
+      } else if (attempts > 30) {
+        clearInterval(timer);
+      }
+    }, 250);
+  }
+
   function wireMindarTargets() {
     const scene = document.querySelector('a-scene');
     if (!scene) return;
@@ -469,6 +562,7 @@
     applyConfigToDom();
     wireMindarTargets();
     initAudioToggle();
+    initFlashlightToggle();
     initMenu();
   });
 })();
